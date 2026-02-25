@@ -1,0 +1,52 @@
+{
+  "appliances": {
+    "1": {
+      "name": "Fan",
+      "type": "fan",
+      "isOn": false,
+      "voltage": 0,
+      "current": 0,
+      "power": 0,
+      "energy": 0,
+      "currentLeakage": 0,
+      "voltageLeakage": 0
+    },
+    "2": {
+      "name": "Bulb",
+      "type": "bulb",
+      "isOn": false,
+      "voltage": 0,
+      "current": 0,
+      "power": 0,
+      "energy": 0,
+      "currentLeakage": 0,
+      "voltageLeakage": 0
+    },
+    "3": {
+      "name": "Pump",
+      "type": "pump",
+      "isOn": false,
+      "voltage": 0,
+      "current": 0,
+      "power": 0,
+      "energy": 0,
+      "currentLeakage": 0,
+      "voltageLeakage": 0
+    },
+    "4": {
+      "name": "Bell",
+      "type": "bell",
+      "isOn": false,
+      "voltage": 0,
+      "current": 0,
+      "power": 0,
+      "energy": 0,
+      "currentLeakage": 0,
+      "voltageLeakage": 0
+    }
+  },
+  "logs": {},
+  "alerts": {},
+  "alerts_history": {},
+  "ai_recommendations": {}
+}

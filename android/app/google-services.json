@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "356056697601",
+    "firebase_url": "https://shapeos-smarthome-default-rtdb.firebaseio.com",
+    "project_id": "shapeos-smarthome",
+    "storage_bucket": "shapeos-smarthome.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356056697601:android:78743814d13b3714c42900",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "356056697601-2b2idamr3f3a04b3tr9muoauhc3vbpf0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_application_1",
+            "certificate_hash": "c920207e7e5b159ac88de192a3613df3a2473bda"
+          }
+        },
+        {
+          "client_id": "356056697601-2v39t2vhhsg9o0m3pj3rdr0mpatcqs82.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2Vz5fB1qgOZTezJeZO2MXR0ZItoneV-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "356056697601-2v39t2vhhsg9o0m3pj3rdr0mpatcqs82.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "356056697601-c4bdneic25i707qt6i7r1e6pfnj9u58n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterApplication1"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

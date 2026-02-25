@@ -1,0 +1,41 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "shapeos-smarthome",
+          "appId": "1:356056697601:android:78743814d13b3714c42900",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "shapeos-smarthome",
+          "configurations": {
+            "android": "1:356056697601:android:78743814d13b3714c42900",
+            "ios": "1:356056697601:ios:5175d5e074487b59c42900",
+            "macos": "1:356056697601:ios:5175d5e074487b59c42900",
+            "web": "1:356056697601:web:024791532d79254cc42900",
+            "windows": "1:356056697601:web:e341b870d1384077c42900"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+       "predeploy": []
+
+    }
+  ]
+}
