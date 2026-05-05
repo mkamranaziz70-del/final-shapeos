@@ -13,25 +13,43 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'routes.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'services/agent_background_service.dart';
+import 'services/agent_orchestrator.dart';
+import 'services/device_simulator_service.dart';
+import 'services/location_service.dart';
+import 'services/user_profile_service.dart';
+import 'services/voice_service.dart';
 
 final FlutterLocalNotificationsPlugin localNotifications =
     FlutterLocalNotificationsPlugin();
 Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage message) async {
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') rethrow;
+  }
   print("🔔 Background message: ${message.notification?.title}");
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ CREATE DEFAULT APP (NO NAME!)
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform.copyWith(
-      databaseURL:
-          'https://shapeos-smarthome-default-rtdb.firebaseio.com/',
-    ),
-  );
+  // ✅ Initialize Firebase. The native Android side may have
+  //    already auto-initialized via google-services.json's
+  //    ContentProvider, in which case calling initializeApp
+  //    throws [core/duplicate-app]. We swallow that one specific
+  //    case — every other Firebase exception still propagates.
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform.copyWith(
+        databaseURL:
+            'https://shapeos-smarthome-default-rtdb.firebaseio.com/',
+      ),
+    );
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') rethrow;
+  }
 
   // 🔥 Background handler
   FirebaseMessaging.onBackgroundMessage(
@@ -79,6 +97,19 @@ Future<void> main() async {
         .set({
       "fcmToken": token,
     }, SetOptions(merge: true));
+  }
+
+  // 🤖 Agent bootstrap (only if logged in — for new sign-ins
+  //    this is also called by the auth flow on dashboard open).
+  await VoiceService.init();
+  await AgentBackgroundService.configure();
+  // 🎚️ Simulator runs unconditionally so live readings are
+  //    realistic during the demo even before login.
+  await DeviceSimulatorService.start();
+  if (user != null) {
+    await UserProfileService.load();
+    await LocationService.start();
+    await AgentOrchestrator.start();
   }
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {

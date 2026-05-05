@@ -14,10 +14,19 @@ import '../widgets/energy_tab.dart';
 import '../widgets/security_tab.dart';
 import '../widgets/logs_tab.dart';
 import '../widgets/voice_tab.dart';
-import '../widgets/ai_monitor_tab.dart';
+import '../widgets/anomalies_tab.dart';
+import '../widgets/bills_tab.dart';
 
 import '../services/device_monitor_service.dart';
 import '../services/voice_service.dart';
+import '../services/location_service.dart';
+import '../services/user_profile_service.dart';
+import '../services/anomaly_detection_service.dart';
+import '../services/agent_automation_engine.dart';
+import '../services/agent_mode_service.dart';
+import '../services/agent_orchestrator.dart';
+import 'agent_chat_screen.dart';
+import 'profile_setup_screen.dart';
 class InitialSetupDialog extends StatefulWidget {
 
   const InitialSetupDialog({super.key});
@@ -441,11 +450,13 @@ late DatabaseReference _dbRef;
   final List<String> _titles = [
     "Home",
     "Control",
-    "AI Monitor",
+    "AI Anomalies",
     "Energy Analytics",
+    "Bill Splitting",
     "Security",
     "Logs",
     "Voice Control",
+    "Agent",
   ];
 
   @override
@@ -460,8 +471,162 @@ _dbRef = FirebaseDatabase.instance
   _listenToRealtimeDB();
   _ensureTodayEnergyDoc();
   _startGlobalMonitoring();
-    _checkFirstLogin();
+  _checkFirstLogin();
+  _bootAgent();
+}
 
+Future<void> _bootAgent() async {
+  // Idempotent — safe to call on every dashboard open.
+  await UserProfileService.load();
+  await LocationService.start();
+  await AgentOrchestrator.start();
+  await AgentModeService.boot();
+}
+
+/// Wraps any tab so it becomes non-interactive while AI mode is
+/// on. A small banner explains why and offers a quick switch back.
+Widget _aiGuard(Widget child) {
+  return ValueListenableBuilder<bool>(
+    valueListenable: AgentModeService.isAiMode,
+    builder: (ctx, ai, _) {
+      if (!ai) return child;
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: true,
+              child: Opacity(opacity: 0.45, child: child),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 12,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF154F73), Color(0xFF0E2E45)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.18),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.smart_toy_rounded,
+                        color: Color(0xFF24E0A0)),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "AI Agent is in control. Manual toggles are disabled — talk to the agent or switch back to Manual.",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.5,
+                            height: 1.3),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: AgentModeService.disableAiMode,
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF24E0A0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      child: const Text(
+                        "MANUAL",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// AppBar toggle: NORMAL  ⇄  AI AGENT.
+/// Persists to Firestore + arms/disarms the wake word.
+Widget _buildModeToggle() {
+  return ValueListenableBuilder<bool>(
+    valueListenable: AgentModeService.isAiMode,
+    builder: (ctx, ai, _) {
+      final color = ai ? const Color(0xFF24E0A0) : Colors.white70;
+      final fg = ai ? const Color(0xFF0E2E45) : Colors.white;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () async {
+            final nowOn = await AgentModeService.toggle();
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                duration: const Duration(seconds: 3),
+                content: Text(
+                  nowOn
+                      ? 'AI Agent mode ON — say "hey shapeos" anywhere.'
+                      : "Switched to manual control.",
+                ),
+              ),
+            );
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: ai ? color : Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: ai ? color : Colors.white.withOpacity(0.4),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  ai
+                      ? Icons.smart_toy_rounded
+                      : Icons.toggle_on_outlined,
+                  size: 18,
+                  color: fg,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  ai ? "AI" : "Manual",
+                  style: TextStyle(
+                    color: fg,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12.5,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 
@@ -475,10 +640,15 @@ Future<void> _checkFirstLogin() async {
 
   final firstDone =
       doc.data()?['firstLoginCompleted'] ?? false;
+  final agentDone =
+      doc.data()?['agentProfileCompleted'] ?? false;
 
   if (!firstDone) {
-    Future.delayed(Duration.zero, () {
-_showSetupPopup();  });
+    Future.delayed(Duration.zero, _showSetupPopup);
+  } else if (!agentDone) {
+    Future.delayed(Duration.zero, _showAgentProfilePopup);
+  } else {
+    UserProfileService.load();
   }
 }
 void _showSetupPopup() {
@@ -486,6 +656,23 @@ void _showSetupPopup() {
     context: context,
     barrierDismissible: false,
     builder: (_) => const InitialSetupDialog(),
+  ).then((_) {
+    // After room/device setup, immediately collect the rich
+    // agent profile if it isn't done yet.
+    if (!mounted) return;
+    UserProfileService.isProfileComplete().then((done) {
+      if (!done && mounted) _showAgentProfilePopup();
+    });
+  });
+}
+
+void _showAgentProfilePopup() {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => ProfileSetupScreen(
+      onComplete: () => Navigator.of(context).pop(),
+    ),
   );
 }
 
@@ -552,6 +739,15 @@ void _showSetupPopup() {
           }
         }
       }
+
+      // Run the smarter, multi-signal anomaly pass too.
+      try {
+        await AnomalyDetectionService.evaluate(
+          devices: appliancesList,
+          motionRecent: true,
+        );
+      } catch (_) {}
+
       return mounted;
     });
   }
@@ -653,12 +849,18 @@ void _listenToRealtimeDB() {
       'isOn': newState,
     });
 
-   final uid = FirebaseAuth.instance.currentUser!.uid;
+    // Tell the smart automation engine that the user (or the
+    // app, or AI Monitor) just touched this device, so it
+    // honours the 5-minute cooldown and doesn't immediately
+    // fight the choice.
+    AgentAutomationEngine.registerManualAction(device.id);
 
-FirebaseDatabase.instance
-    .ref("users/$uid/logs")
-    .push()
-    .set({
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    FirebaseDatabase.instance
+        .ref("users/$uid/logs")
+        .push()
+        .set({
       "event":
           "${device.name} turned ${newState ? "ON" : "OFF"} via $source",
       "time": DateTime.now().toString(),
@@ -704,18 +906,24 @@ FirebaseDatabase.instance
         onDeviceTap: (d) =>
             context.push('/dashboard/device-detail', extra: d),
       ),
-      ControlTab(
-        appliances: appliancesList,
-        onToggle: (d) => _toggleDevice(d, source: "App"),
+      _aiGuard(
+        ControlTab(
+          appliances: appliancesList,
+          onToggle: (d) => _toggleDevice(d, source: "App"),
+        ),
       ),
-      AIMonitorTab(appliances: appliancesList),
-      const EnergyTab(), // ✅ CORRECT
+      const AnomaliesTab(),
+      const EnergyTab(),
+      const BillsTab(),
       SecurityTab(),
       const LogsTab(),
-      VoiceTab(
-        appliances: appliancesList,
-        onToggle: (d) => _toggleDevice(d, source: "Voice"),
+      _aiGuard(
+        VoiceTab(
+          appliances: appliancesList,
+          onToggle: (d) => _toggleDevice(d, source: "Voice"),
+        ),
       ),
+      const AgentChatScreen(),
     ];
 
     return WillPopScope(
@@ -743,19 +951,34 @@ FirebaseDatabase.instance
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
-          "Smart Home Dashboard",
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white70,
-            letterSpacing: 0.2,
+        ValueListenableBuilder<LiveLocation?>(
+          valueListenable: LocationService.current,
+          builder: (ctx, loc, _) => Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.location_on_rounded,
+                  size: 12, color: Colors.white70),
+              const SizedBox(width: 3),
+              Flexible(
+                child: Text(
+                  loc?.label ?? "Locating…",
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     ),
     actions: [
+      _buildModeToggle(),
       Padding(
-        padding: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.only(right: 8),
         child: IconButton(
           tooltip: "Logout",
           icon: const Icon(Icons.logout_rounded),
@@ -812,17 +1035,32 @@ Widget build(BuildContext context) {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _navItem(icon: Icons.home_rounded, label: "Home", index: 0),
-            _navItem(icon: Icons.settings_rounded, label: "Control", index: 1),
-            _navItem(icon: Icons.psychology_rounded, label: "AI", index: 2),
-            _navItem(icon: Icons.show_chart_rounded, label: "Energy", index: 3),
-            _navItem(icon: Icons.security_rounded, label: "Security", index: 4),
-            _navItem(icon: Icons.history_rounded, label: "Logs", index: 5),
-            _navItem(icon: Icons.mic_rounded, label: "Voice", index: 6),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              _navItem(icon: Icons.home_rounded, label: "Home", index: 0),
+              _navItem(icon: Icons.settings_rounded, label: "Control", index: 1),
+              _navItem(
+                  icon: Icons.shield_moon_rounded,
+                  label: "Anomalies",
+                  index: 2),
+              _navItem(
+                  icon: Icons.show_chart_rounded, label: "Energy", index: 3),
+              _navItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: "Bills",
+                  index: 4),
+              _navItem(
+                  icon: Icons.security_rounded, label: "Security", index: 5),
+              _navItem(
+                  icon: Icons.history_rounded, label: "Logs", index: 6),
+              _navItem(icon: Icons.mic_rounded, label: "Voice", index: 7),
+              _navItem(
+                  icon: Icons.smart_toy_rounded, label: "Agent", index: 8),
+            ],
+          ),
         ),
       ),
     ),
@@ -843,8 +1081,9 @@ Widget build(BuildContext context) {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(

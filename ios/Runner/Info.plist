@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SHAPEOS uses your location to give the in-home agent live weather and context-aware suggestions.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SHAPEOS uses your location to give the in-home agent live weather and context-aware suggestions.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SHAPEOS listens to voice commands so you can talk to the home agent.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>SHAPEOS converts your voice to text so the agent can understand commands.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

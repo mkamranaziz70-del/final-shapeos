@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 🌐 Internet access (Firebase, APIs) -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -11,6 +12,18 @@
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!-- 📍 Location for the live agent context + weather lookup -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- 🌐 Network state for offline-aware fetches -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- 🌙 Foreground service so the wake-word mic survives backgrounding -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <application
         android:name="${applicationName}"
         android:label="ShapeOS"
@@ -60,6 +73,14 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_channel_id" />
+
+        <!-- 🌙 Background wake-word foreground service.
+             The plugin already declares this service; we only override
+             the foregroundServiceType so the mic can run on Android 14+. -->
+        <service
+            android:name="id.flutter.flutter_background_service.BackgroundService"
+            android:foregroundServiceType="microphone|dataSync"
+            tools:replace="android:foregroundServiceType" />
     </application>
 
     <!-- ✅ Required for text processing / speech APIs -->

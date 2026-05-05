@@ -7,7 +7,6 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import '../models/device_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/energy_logger.dart';
 class ControlTab extends StatefulWidget {
   final List<DeviceModel> appliances;
   final void Function(DeviceModel device) onToggle;
@@ -61,19 +60,12 @@ _applianceSub = FirebaseFirestore.instance
     _tts.setVolume(1.0);
     _tts.setSpeechRate(0.42);
     _tts.setPitch(1.1);
-    _energyTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-  for (final d in widget.appliances) {
-    final isOn = _states[d.id] ?? d.isOn;
-
-    if (isOn && d.power > 0) {
-      EnergyLogger.logEnergy(
-        deviceId: d.id,
-        deviceName: d.name,
-        power: d.power,
-      );
-    }
-  }
-});
+    // 🔇 Energy logger disabled — it was accumulating into the
+    // /energy_daily/{today} Firestore doc on top of the seeded
+    // values, blowing today's bill up indefinitely. The bills
+    // tab now reads exclusively from the seeder + simulator,
+    // both of which produce calibrated, realistic numbers.
+    _energyTimer = null;
 
   }
 
