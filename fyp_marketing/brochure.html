@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ShapeOS — Brochure</title>
+<style>
+  /* ============ Page setup: landscape A4 ============ */
+  @page { size: 1280px 880px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #eef1f5;
+    font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    color: #0f1a2e;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 1280px;
+    height: 880px;
+    background: #ffffff;
+    margin: 24px auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .page:last-of-type { page-break-after: auto; break-after: auto; }
+
+  /* ============ PRINT: lock layout to @page exactly ============ */
+  @media print {
+    html, body {
+      background: #ffffff;
+      width: 1280px;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .page {
+      margin: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      width: 1280px !important;
+      height: 880px !important;
+      overflow: hidden !important;
+    }
+  }
+  /* Soft decorative blobs reminiscent of the MindNest leaf motif but tech-themed */
+  .blob {
+    position: absolute; pointer-events: none; z-index: 0;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: .55;
+  }
+  .blob.cyan { background: radial-gradient(circle, #b6e9f6, transparent 60%); }
+  .blob.navy { background: radial-gradient(circle, #cdd9ee, transparent 60%); }
+  .blob.green { background: radial-gradient(circle, #c8efd6, transparent 60%); }
+
+  /* ============ PAGE 1 LAYOUT ============ */
+  .p1 .grid {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    height: 100%;
+    padding: 54px 64px;
+    gap: 36px;
+    align-items: center;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .brand .logo {
+    width: 74px; height: 74px;
+    border-radius: 16px;
+    background: #000;
+    padding: 4px;
+    box-shadow: 0 8px 20px rgba(11,28,61,.25);
+  }
+  .brand .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .brand .bname { font-size: 36px; font-weight: 800; color: #0b1c3d; letter-spacing: .3px; }
+  .brand .btag  { font-size: 12px; color: #5a6a85; letter-spacing: .18em; text-transform: uppercase; margin-top: 4px; }
+
+  /* University crests in ribbon */
+  .crest-img {
+    width: 42px; height: 42px;
+    background: #fff;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 3px 10px rgba(11,28,61,.18);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .crest-img img { width: 100%; height: 100%; object-fit: contain; }
+  .crest-img img.jpg-clip {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0;
+  }
+  .ribbon-group { display: flex; align-items: center; gap: 10px; }
+
+  .lede h1 {
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 800;
+    color: #0b1c3d;
+    margin-bottom: 16px;
+  }
+  .lede h1 .accent {
+    background: linear-gradient(90deg,#0b6a8c,#00c2a8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .lede .quote {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b6a8c;
+    margin-bottom: 12px;
+  }
+  .lede p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #2c3a52;
+    max-width: 500px;
+  }
+  .lede p strong { color: #0b1c3d; }
+
+  .props {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 22px;
+    max-width: 520px;
+  }
+  .prop {
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .prop .ico {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 10px;
+    background: #eaf6fa;
+    color: #0b6a8c;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .prop .ico svg { width: 20px; height: 20px; }
+  .prop .pt { font-size: 13.5px; font-weight: 700; color: #0b1c3d; }
+  .prop .pd { font-size: 11.5px; color: #5a6a85; margin-top: 2px; line-height: 1.4; }
+
+  /* ============ Mockups column ============ */
+  .mock-stage {
+    position: relative;
+    height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .phone {
+    width: 250px;
+    height: 510px;
+    border-radius: 36px;
+    background: linear-gradient(180deg,#0b1c3d,#14366e);
+    box-shadow: 0 24px 50px rgba(11,28,61,.28);
+    padding: 12px;
+    position: absolute;
+  }
+  .phone .screen {
+    width: 100%; height: 100%;
+    border-radius: 26px;
+    background: #f6f9fc;
+    position: relative;
+    overflow: hidden;
+    padding: 18px 14px;
+  }
+  .phone .notch {
+    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 90px; height: 18px; background: #0b1c3d; border-radius: 12px; z-index: 5;
+  }
+  .phone.left  { transform: translateX(-150px) rotate(-6deg); z-index: 1; }
+  .phone.right { transform: translateX(150px) rotate(6deg);  z-index: 1; }
+  .phone.center { z-index: 3; }
+
+  /* Mini-UI inside phones */
+  .ui-h { display:flex; align-items:center; justify-content:space-between; margin: 12px 4px 14px; }
+  .ui-h .greet { font-size: 13px; font-weight: 700; color: #0b1c3d; }
+  .ui-h .sub { font-size: 9px; color: #5a6a85; margin-top: 2px; }
+  .ui-h .dot { width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg,#0b6a8c,#00c2a8); }
+
+  .card {
+    background: #fff; border-radius: 14px; padding: 10px 12px;
+    box-shadow: 0 4px 14px rgba(11,28,61,.06);
+    margin-bottom: 10px;
+  }
+  .card-h { font-size: 9.5px; color: #5a6a85; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .ring { width: 70px; height: 70px; border-radius: 50%; margin: 4px auto;
+    background: conic-gradient(#00c2a8 0 65%, #e1e8f0 65% 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ring .inner { width: 56px; height: 56px; border-radius: 50%; background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size: 10px; color:#5a6a85;
+  }
+  .ring .inner b { font-size: 16px; color: #0b1c3d; }
+
+  .stat-row { display: flex; gap: 8px; }
+  .stat {
+    flex: 1; background: #f6f9fc; border-radius: 8px; padding: 8px 6px; text-align: center;
+  }
+  .stat .v { font-size: 13px; font-weight: 800; color: #0b6a8c; }
+  .stat .l { font-size: 8px; color: #5a6a85; letter-spacing: .05em; text-transform: uppercase; margin-top: 2px;}
+
+  .dev-row { display: flex; gap: 8px; margin-top: 6px; }
+  .dev {
+    flex: 1; background: #fff; border:1px solid #e1e8f0; border-radius: 10px;
+    padding: 8px 6px; display:flex; flex-direction:column; align-items:center;
+  }
+  .dev .ic { width: 22px; height: 22px; border-radius: 6px;
+    background: linear-gradient(135deg,#0b6a8c,#00c2a8); margin-bottom: 4px;
+  }
+  .dev .nm { font-size: 8.5px; color: #0b1c3d; font-weight: 700; }
+  .dev .st { font-size: 7.5px; color: #1f8a4c; margin-top: 1px; }
+
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 60px; margin-top: 6px; }
+  .bars .b { flex:1; background: linear-gradient(180deg,#00c2a8,#0b6a8c); border-radius: 3px; }
+
+  .chat-bubble {
+    background: #eaf6fa; color: #0b1c3d; font-size: 9px;
+    padding: 6px 9px; border-radius: 10px 10px 10px 2px;
+    max-width: 80%; margin-bottom: 6px;
+  }
+  .chat-bubble.me {
+    background: linear-gradient(135deg,#0b6a8c,#0b1c3d); color: #fff;
+    border-radius: 10px 10px 2px 10px; margin-left: auto;
+  }
+
+  /* ============ PAGE 1 footer ribbon ============ */
+  .ribbon {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(90deg,#0b1c3d,#0b6a8c);
+    color: #fff;
+    padding: 12px 64px;
+    font-size: 12.5px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 5;
+  }
+  .ribbon .team { display:flex; gap: 16px; }
+  .ribbon .team span { color: #b6e9f6; }
+  .ribbon .team b { color: #fff; }
+
+  /* ============ PAGE 2 ============ */
+  .p2 .frame {
+    position: relative; z-index: 2;
+    padding: 48px 56px 36px;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto 1fr auto;
+    gap: 22px 26px;
+  }
+  .p2 h2 {
+    font-size: 18px; font-weight: 800; color: #0b1c3d;
+    background: linear-gradient(90deg,#0b6a8c,#00c2a8);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e1e8f0;
+    position: relative;
+  }
+  .p2 h2::after {
+    content:''; position: absolute; left: 0; bottom: -2px;
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg,#0b6a8c,#00c2a8);
+  }
+  .item { display:flex; align-items:flex-start; gap: 10px; margin-bottom: 10px; }
+  .item .bullet {
+    width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px;
+    background: #eaf6fa; color: #0b6a8c;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .item .bullet svg { width: 14px; height: 14px; }
+  .item .txt { font-size: 12.5px; line-height: 1.5; color: #2c3a52; }
+  .item .txt b { color: #0b1c3d; }
+
+  /* Feature grid bottom */
+  .features-strip {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+  .features-strip h2 { margin-bottom: 12px; }
+  .feat-cards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  .feat-card {
+    background: linear-gradient(180deg,#0b1c3d,#0b6a8c);
+    color: #fff;
+    border-radius: 12px;
+    padding: 14px 12px;
+    box-shadow: 0 6px 18px rgba(11,28,61,.18);
+  }
+  .feat-card .ftt { font-size: 12.5px; font-weight: 800; margin-bottom: 4px; }
+  .feat-card .fdd { font-size: 10.5px; color: #cfe3ff; line-height: 1.4; }
+
+  .p2-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    text-align: center; padding: 14px 0; z-index: 5;
+    background: #0b1c3d; color: #cfe3ff;
+    font-size: 12px; letter-spacing: .04em;
+  }
+  .p2-footer .arrow {
+    color: #00c2a8; margin: 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== PAGE 1 ============================== -->
+<div class="page p1">
+  <div class="blob cyan" style="width: 360px; height: 360px; top: -120px; right: -120px;"></div>
+  <div class="blob navy" style="width: 260px; height: 260px; bottom: -80px; left: -80px;"></div>
+  <div class="blob green" style="width: 220px; height: 220px; bottom: 30%; left: 30%;"></div>
+
+  <div class="grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="lede">
+      <div class="brand">
+        <div class="logo"><img src="../assets/images/logo.png" alt="ShapeOS"/></div>
+        <div>
+          <div class="bname">ShapeOS</div>
+          <div class="btag">Smart Home. Smarter Energy.</div>
+        </div>
+      </div>
+
+      <h1>Your home,<br/><span class="accent">finally intelligent.</span></h1>
+      <div class="quote">Beyond automation lies predictive optimization.</div>
+      <p>
+        ShapeOS is an intelligent operating layer for the modern home. It controls every appliance
+        in real time, quietly learns when energy is being wasted, and applies its own corrections
+        during peak hours so bills come down on their own. A conversational agent powered by Google
+        Gemini holds natural conversations with the resident, answers questions about consumption,
+        and watches over the home for hazards before they ever become incidents.
+      </p>
+
+      <div class="props">
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+          <div>
+            <div class="pt">Predictive</div>
+            <div class="pd">Quietly studies peak hour patterns and trims the waste on its own.</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <div>
+            <div class="pt">Conversational</div>
+            <div class="pd">A wake word agent that listens, understands and replies in natural speech.</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div>
+            <div class="pt">Safe</div>
+            <div class="pd">Cuts power instantly when voltage, leakage or gas readings drift outside the safe band.</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg></div>
+          <div>
+            <div class="pt">Quantified</div>
+            <div class="pd">Tracks every unit consumed and shows live bills against peak and off peak tariffs.</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+          <div>
+            <div class="pt">Room Aware</div>
+            <div class="pd">Groups devices by room so households can see exactly where the load is going.</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0 1 16 0v4a4 4 0 0 1-4 4h-1v-7h5"/><path d="M4 16a4 4 0 0 0 4 4h1v-7H4"/></svg></div>
+          <div>
+            <div class="pt">Voice</div>
+            <div class="pd">Holds a real conversation. Speak naturally and the home responds in kind.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: phones -->
+    <div class="mock-stage">
+
+      <!-- Left phone: Dashboard -->
+      <div class="phone left">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="ui-h">
+            <div>
+              <div class="greet">Good Evening</div>
+              <div class="sub">Admin · 18:42</div>
+            </div>
+            <div class="dot"></div>
+          </div>
+          <div class="card">
+            <div class="card-h">Live Power</div>
+            <div class="stat-row">
+              <div class="stat"><div class="v">847W</div><div class="l">Now</div></div>
+              <div class="stat"><div class="v">4.2kWh</div><div class="l">Today</div></div>
+              <div class="stat"><div class="v">₨ 312</div><div class="l">Day Bill</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Devices</div>
+            <div class="dev-row">
+              <div class="dev"><div class="ic"></div><div class="nm">Fan</div><div class="st">ON</div></div>
+              <div class="dev"><div class="ic" style="background:linear-gradient(135deg,#f5a623,#f57c00);"></div><div class="nm">Bulb</div><div class="st">ON</div></div>
+              <div class="dev"><div class="ic" style="background:#cfd9e8;"></div><div class="nm">Pump</div><div class="st" style="color:#5a6a85;">OFF</div></div>
+              <div class="dev"><div class="ic" style="background:#cfd9e8;"></div><div class="nm">Bell</div><div class="st" style="color:#5a6a85;">OFF</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Last 24h</div>
+            <div class="bars">
+              <div class="b" style="height:40%"></div>
+              <div class="b" style="height:30%"></div>
+              <div class="b" style="height:55%"></div>
+              <div class="b" style="height:70%"></div>
+              <div class="b" style="height:88%"></div>
+              <div class="b" style="height:60%"></div>
+              <div class="b" style="height:45%"></div>
+              <div class="b" style="height:35%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center phone: Optimization -->
+      <div class="phone center">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="ui-h">
+            <div>
+              <div class="greet">Optimization</div>
+              <div class="sub">14-day analysis</div>
+            </div>
+            <div class="dot"></div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="card-h">Projected Savings</div>
+            <div class="ring"><div class="inner"><b>22%</b>this month</div></div>
+            <div style="font-size:10px; color:#5a6a85; margin-top:6px;">₨ <b style="color:#0b1c3d;font-size:13px;">218</b> lower than last cycle</div>
+          </div>
+          <div class="card">
+            <div class="card-h">Committed Rules</div>
+            <div style="font-size:10.5px; color:#0b1c3d; padding: 4px 0; border-bottom:1px solid #eef1f5;">
+              <b>Bulb</b> · auto-off 18–23 <span style="color:#1f8a4c;float:right;">ACTIVE</span>
+            </div>
+            <div style="font-size:10.5px; color:#0b1c3d; padding: 4px 0; border-bottom:1px solid #eef1f5;">
+              <b>Pump</b> · auto-off 19–22 <span style="color:#1f8a4c;float:right;">ACTIVE</span>
+            </div>
+            <div style="font-size:10.5px; color:#0b1c3d; padding: 4px 0;">
+              <b>Fan</b> · auto-off when idle <span style="color:#1f8a4c;float:right;">ACTIVE</span>
+            </div>
+          </div>
+          <div class="card" style="background:linear-gradient(135deg,#0b6a8c,#0b1c3d);color:#fff;">
+            <div class="card-h" style="color:#cfe3ff;">Engine</div>
+            <div style="font-size:11px;font-weight:700;">Peak-hour enforcement live</div>
+            <div style="font-size:9px;color:#cfe3ff;margin-top:2px;">Next tick in 1m 42s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right phone: Agent chat -->
+      <div class="phone right">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="ui-h">
+            <div>
+              <div class="greet">Agent</div>
+              <div class="sub">Gemini · listening</div>
+            </div>
+            <div class="dot"></div>
+          </div>
+          <div class="chat-bubble me">Turn off the bulb in the living room.</div>
+          <div class="chat-bubble">Done — bulb is now off. Saved you about 18W.</div>
+          <div class="chat-bubble me">What was the spike at 7 PM?</div>
+          <div class="chat-bubble">Pump current jumped to 4.1A — flagged as anomaly. I cut it for safety.</div>
+          <div class="chat-bubble me">Remind me to check the fan tomorrow.</div>
+          <div class="chat-bubble">Saved to memory. I'll remind you at 9 AM.</div>
+          <div class="card" style="margin-top:8px;background:linear-gradient(135deg,#00c2a8,#0b6a8c);color:#fff;text-align:center;padding:8px;">
+            <div style="font-size:10px;font-weight:700;">Wake word active</div>
+            <div style="font-size:8.5px;color:#dffaf3;">Say "Shape" to begin</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ribbon">
+    <div class="ribbon-group">
+      <div class="crest-img" title="Air University"><img src="../assets/images/air-university-logo-1.png" alt="Air University"/></div>
+      <div>
+        <div style="font-size:11px;color:#b6e9f6;letter-spacing:.08em;">FYP 2026</div>
+        <div style="font-size:12px;color:#fff;font-weight:700;">Air University</div>
+      </div>
+    </div>
+    <div class="team">
+      <span><b>Muhammad Kamran</b></span>
+      <span><b>Moneeb Toor</b></span>
+      <span><b>Aroosha Shafqat</b></span>
+    </div>
+    <div class="ribbon-group" style="justify-content:flex-end;">
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#b6e9f6;letter-spacing:.08em;">Supervisor</div>
+        <div style="font-size:12px;color:#fff;font-weight:700;">Mr. Tariq Mehmood Danish</div>
+      </div>
+      <div class="crest-img" title="Department of Computer Science"><img class="jpg-clip" src="../assets/images/dept%20of%20cs.jpg" alt="Department of Computer Science"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 2 ============================== -->
+<div class="page p2">
+  <div class="blob cyan" style="width: 280px; height: 280px; top: -80px; left: -80px;"></div>
+  <div class="blob green" style="width: 240px; height: 240px; bottom: 80px; right: -60px;"></div>
+  <div class="blob navy" style="width: 200px; height: 200px; top: 30%; right: 35%;"></div>
+
+  <div class="frame">
+
+    <!-- The Challenge -->
+    <div>
+      <h2>The Challenge</h2>
+      <div class="item">
+        <div class="bullet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg></div>
+        <div class="txt">Electricity bills keep climbing every cycle while households have no real visibility into which appliances are responsible during peak hours.</div>
+      </div>
+      <div class="item">
+        <div class="bullet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg></div>
+        <div class="txt">Existing smart home apps are good at flipping switches, but they never act on the data they collect or close the loop on consumption.</div>
+      </div>
+      <div class="item">
+        <div class="bullet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5l14 14M19 5L5 19"/></svg></div>
+        <div class="txt">Voltage surges, current leakage and gas events typically go unnoticed until they have already damaged appliances or harmed residents.</div>
+      </div>
+      <div class="item">
+        <div class="bullet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg></div>
+        <div class="txt">There is no centralised record of what changed in the home, when it changed, or why, which makes diagnosing problems nearly impossible.</div>
+      </div>
+    </div>
+
+    <!-- The Solution -->
+    <div>
+      <h2>The Solution</h2>
+      <div class="item">
+        <div class="bullet" style="background:#e0f7f5;color:#0e8c80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+        <div class="txt">A predictive optimisation engine studies two weeks of consumption, spots where peak hour energy is being wasted and quietly enforces auto off rules to bring the bill down.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#e0f7f5;color:#0e8c80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="txt">A conversational agent powered by Google Gemini holds natural conversations, performs real actions through tools and remembers facts the resident chooses to share.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#e0f7f5;color:#0e8c80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="txt">A profile band anomaly detector continuously watches voltage and current readings and instantly cuts power the moment something drifts outside the safe envelope.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#e0f7f5;color:#0e8c80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></div>
+        <div class="txt">Every action taken in the house, whether by a person, by an automation, or by the agent itself, is recorded with a reason so the history of the home is always available.</div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div>
+      <h2>Objectives</h2>
+      <div class="item">
+        <div class="bullet" style="background:#fef6e0;color:#b88500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="txt">Deliver a complete smart home operating layer that gives residents real time control of every connected device in their home.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#fef6e0;color:#b88500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="txt">Reduce peak hour electricity costs through automation rules the system learns from the household&rsquo;s own consumption history.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#fef6e0;color:#b88500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="txt">Provide a conversational agent that lets the resident interact with the home in plain language, by voice or by chat.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#fef6e0;color:#b88500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="txt">Protect residents from electrical and environmental hazards through continuous anomaly detection and automatic cut off.</div>
+      </div>
+      <div class="item">
+        <div class="bullet" style="background:#fef6e0;color:#b88500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="txt">Make consumption transparent at room level so a family can see exactly where energy is going and split the monthly bill fairly.</div>
+      </div>
+    </div>
+
+    <!-- KEY FEATURES STRIP -->
+    <div class="features-strip">
+      <h2>Key Features</h2>
+      <div class="feat-cards">
+        <div class="feat-card">
+          <div class="ftt">Optimisation</div>
+          <div class="fdd">Studies two weeks of usage and commits enforceable peak hour savings rules.</div>
+        </div>
+        <div class="feat-card" style="background:linear-gradient(180deg,#0e8c80,#0b6a8c);">
+          <div class="ftt">AI Agent</div>
+          <div class="fdd">A conversational brain that performs real actions and remembers what matters.</div>
+        </div>
+        <div class="feat-card">
+          <div class="ftt">Voice Mode</div>
+          <div class="fdd">Speak to the home naturally and it speaks back without ever pressing a button.</div>
+        </div>
+        <div class="feat-card" style="background:linear-gradient(180deg,#0e8c80,#0b6a8c);">
+          <div class="ftt">Anomaly</div>
+          <div class="fdd">Continuous safety monitoring that cuts the power the moment something is wrong.</div>
+        </div>
+        <div class="feat-card">
+          <div class="ftt">Bills</div>
+          <div class="fdd">Live daily and monthly estimates that respect peak and off peak tariffs.</div>
+        </div>
+        <div class="feat-card" style="background:linear-gradient(180deg,#0e8c80,#0b6a8c);">
+          <div class="ftt">Rooms</div>
+          <div class="fdd">Group devices by room, see where energy goes and split the bill fairly.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="p2-footer">
+    ShapeOS &nbsp;&middot;&nbsp; Smart Home Automation and Predictive Energy Optimization
+  </div>
+</div>
+
+</body>
+</html>

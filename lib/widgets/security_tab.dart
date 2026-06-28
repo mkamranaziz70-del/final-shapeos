@@ -98,11 +98,9 @@ Widget build(BuildContext context) {
           "Warning! Smoke detected.",
         );
         break;
-      case "motion":
-        await _tts.speak(
-          "Alert! Motion detected.",
-        );
-        break;
+      // 'motion' alerts are intentionally ignored — the PIR
+      // sensor was decommissioned and we don't want the red
+      // alert popping up on stale values.
         case "fanovercurrent":
   await _tts.speak(
     "Warning! Fan overcurrent detected. Device may be unsafe.",
@@ -144,6 +142,9 @@ builder: (context, snapshot) {
   final List<MapEntry<String, dynamic>> activeItems = [];
 
   data.forEach((key, value) {
+    // 🚫 Skip motion entirely — sensor decommissioned.
+    if (key.toString().toLowerCase() == "motion") return;
+
     bool isActive = false;
 
     // 🔥 Handle BOTH data structures

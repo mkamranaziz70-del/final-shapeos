@@ -80,6 +80,11 @@ class BillSplittingService {
   static const double _activityFloor = 0.001;
 
   /// Compute the bill split for any inclusive date range.
+  ///
+  /// Bills now split per-room (via the admin-managed `/rooms/`
+  /// collection). Each room contributes its occupant's name and
+  /// the devices that live in it; the bill is divided
+  /// proportionally to the energy used by those devices.
   static Future<BillBreakdown> compute({
     required DateTime startDate,
     required DateTime endDate,
@@ -92,16 +97,16 @@ class BillSplittingService {
     final end = DateTime(endDate.year, endDate.month, endDate.day);
     final label = _formatRange(start, end);
 
-    // 1) All users with selectedDevices.
-    final usersSnap = await fs.collection("users").get();
-    final users = usersSnap.docs.map((d) {
+    // 1) Read every room — that's now the source of truth.
+    final roomsSnap = await fs.collection("rooms").get();
+    final users = roomsSnap.docs.map((d) {
       final data = d.data();
       return {
         "uid": d.id,
-        "name": (data["fullName"] ?? data["email"] ?? "User").toString(),
-        "room": (data["room"] ?? "").toString(),
+        "name": (data["occupant"] ?? data["name"] ?? "Room").toString(),
+        "room": (data["name"] ?? "").toString(),
         "deviceIds":
-            List<String>.from(data["selectedDevices"] ?? const []),
+            List<String>.from(data["deviceIds"] ?? const []),
       };
     }).toList();
 

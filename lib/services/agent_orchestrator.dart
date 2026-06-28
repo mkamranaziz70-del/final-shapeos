@@ -129,16 +129,15 @@ class AgentOrchestrator {
       }
 
       // Detect rising edges (clear -> active) and act/speak.
+      // Motion is intentionally skipped — the PIR sensor was
+      // decommissioned, so even if a stale value appears in the
+      // database the agent ignores it.
       for (final entry in next.entries) {
+        if (entry.key == "motion") continue;
         final wasActive = _lastAlerts[entry.key] == true;
         if (entry.value && !wasActive) {
           await _onAlertRose(entry.key);
         }
-      }
-
-      // Track motion timestamps for bulb logic.
-      if (next["motion"] == true) {
-        _lastMotionAt = DateTime.now();
       }
 
       _lastAlerts = next;
@@ -176,10 +175,6 @@ class AgentOrchestrator {
           reason: "Gas concentration above safe threshold.",
           trigger: "sensor_gas",
         );
-        break;
-      case "motion":
-        // Motion is informational only; bulb logic handles it.
-        await VoiceService.speak("Motion detected at the entrance.");
         break;
       case "bulb_voltage_surge":
         await VoiceService.speak(
@@ -286,38 +281,14 @@ class AgentOrchestrator {
   }
 
   // =========================================================
-  // BULB MOTION RULE
+  // BULB MOTION RULE — REMOVED
   // =========================================================
+  // The PIR motion sensor was decommissioned. The bulb now turns
+  // on or off ONLY when the user toggles it manually (or when an
+  // explicitly-committed peak-hour rule fires from the
+  // EnergyOptimizationService). No motion-based auto-off here.
   static void _wireBulbMotionLoop() {
-    _bulbMotionTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      // Bulb auto-cut is an autonomous action — only run it when
-      // the user has explicitly given the AI agent control.
-      if (!AgentModeService.isAiMode.value) return;
-
-      final bulb = _devices.firstWhere(
-        (d) => d.id == "2",
-        orElse: () => _bulbPlaceholder(),
-      );
-      if (!bulb.isOn) return;
-
-      // If we never observed motion since the bulb came on,
-      // anchor "since when" to the bulb-on moment so we don't
-      // shut it off instantly at startup.
-      final reference = _lastMotionAt ?? _bulbOnSince ?? DateTime.now();
-      final idle = DateTime.now().difference(reference);
-      if (idle < bulbMotionGrace) return;
-
-      await _speakAndAct(
-        spoken:
-            "Switching the bulb off — I have not detected anyone in the room for ${idle.inMinutes} minutes.",
-        deviceId: "2",
-        newState: false,
-        reason:
-            "No motion detected for ${idle.inMinutes} minutes after bulb was on.",
-        trigger: "auto_motion_timeout",
-      );
-      _bulbOnSince = null;
-    });
+    // intentionally empty
   }
 
   // =========================================================

@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ShapeOS — FYP Standee</title>
+<style>
+  /* ============ Page setup ============ */
+  @page { size: 900px 2550px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #e9eef3;
+    font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    color: #1a2233;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .standee {
+    width: 900px;
+    height: 2550px;
+    margin: 0 auto;
+    background: #ffffff;
+    box-shadow: 0 8px 40px rgba(0,0,0,.15);
+    overflow: hidden;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ============ PRINT: lock standee to a single page ============ */
+  @media print {
+    html, body {
+      background: #ffffff;
+      width: 900px;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .standee {
+      margin: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      width: 900px !important;
+      height: 2550px !important;
+      overflow: hidden !important;
+    }
+  }
+
+  /* ============ HEADER ============ */
+  .header {
+    background: #122a55;
+    color: #fff;
+    padding: 28px 40px 26px;
+    position: relative;
+  }
+  .header-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 130px;
+    align-items: center;
+    gap: 24px;
+  }
+  .crest {
+    width: 130px;
+    height: 130px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .crest img { width: 100%; height: 100%; object-fit: contain; }
+  .crest img.jpg-clip {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0;
+  }
+
+  .title-block { text-align: center; }
+  .title-block .with-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 6px;
+  }
+  .title-block .shape-logo {
+    width: 72px; height: 72px;
+    border-radius: 14px;
+    background: #000;
+    padding: 2px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
+  }
+  .title-block .shape-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .title-block h1 {
+    font-size: 66px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: #ffffff;
+  }
+  .title-block .sub {
+    font-size: 13.5px;
+    color: #aac7ee;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .team {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 56px;
+  }
+  .member { text-align: center; font-size: 15px; line-height: 1.35; }
+  .member .name { font-weight: 700; color: #ffffff; font-size: 16px; }
+  .member .id   { font-size: 12px; color: #8eb1d8; margin-top: 3px; letter-spacing: .04em; }
+  .supervisor {
+    text-align: center;
+    margin-top: 16px;
+    color: #c6dcf5;
+    font-size: 14px;
+  }
+  .supervisor strong { color: #fff; font-weight: 700; }
+
+  /* ============ SECTION HEADING ============ */
+  .section { padding: 28px 40px 6px; }
+  .h2 {
+    font-size: 34px;
+    font-weight: 800;
+    color: #122a55;
+    margin-bottom: 14px;
+    position: relative;
+    padding-bottom: 8px;
+  }
+  .h2::after {
+    content: '';
+    position: absolute; left: 0; bottom: 0;
+    width: 100%; height: 2px;
+    background: #122a55;
+  }
+
+  /* ============ SCOPE ============ */
+  .scope p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #2c3a52;
+    text-align: justify;
+  }
+  .scope .badge {
+    float: right;
+    width: 90px; height: 90px;
+    margin-left: 16px;
+    border-radius: 14px;
+    background: #000;
+    padding: 4px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  }
+  .scope .badge img { width: 100%; height: 100%; object-fit: contain; }
+
+  /* ============ ARCHITECTURE (SVG container) ============ */
+  .arch-wrap {
+    background: #ffffff;
+    border: 1px solid #d9e3ee;
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .arch-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* ============ OUTPUT (UI mock cards) ============ */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .mock {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dde7f1;
+    box-shadow: 0 4px 14px rgba(11,28,61,.06);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .mock-tab {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: #122a55;
+    color: #fff;
+    font-size: 10px; letter-spacing: .1em;
+    padding: 3px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  /* Tiny dashboard mock */
+  .m-dash {
+    background:
+      linear-gradient(180deg,#122a55 0,#122a55 38px,#f6f9fc 38px);
+    width: 100%; height: 100%;
+    padding: 50px 12px 12px;
+    color: #1a2233;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .m-dash .card {
+    background:#fff; border-radius:8px; padding:8px 10px;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+    font-size: 10.5px;
+  }
+  .m-dash .card .v { font-size: 14px; font-weight: 800; color:#0b6a8c; }
+  .m-dash .row { display:flex; gap:6px; }
+  .m-dash .row .card { flex:1; text-align:center; }
+  .m-dash .bars { display:flex; align-items:flex-end; gap:3px; height:30px; }
+  .m-dash .bars span { flex:1; background:linear-gradient(180deg,#00c2a8,#0b6a8c); border-radius:2px; }
+
+  /* ============ FEATURES ============ */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .feat {
+    background: #ffffff;
+    border: 1px solid #dde7f1;
+    border-left: 4px solid #122a55;
+    border-radius: 8px;
+    padding: 13px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .feat .ic {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 9px;
+    background: #122a55;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feat .ic svg { width: 20px; height: 20px; }
+  .feat .ft { font-size: 13.5px; font-weight: 700; color: #122a55; margin-bottom: 3px; }
+  .feat .fd { font-size: 11.5px; line-height: 1.45; color: #4a5a73; }
+
+  /* ============ TOOLS — official brand logos ============ */
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .tool {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .tool .logo-box {
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tool .logo-box img,
+  .tool .logo-box svg { max-width: 100%; max-height: 100%; display: block; }
+  .tool .tname { font-size: 12.5px; font-weight: 700; color: #122a55; letter-spacing: .02em; }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    margin-top: 28px;
+    background: #122a55;
+    color: #c6dcf5;
+    padding: 20px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  .footer .col { font-size: 13.5px; line-height: 1.45; }
+  .footer .col.center { text-align: center; }
+  .footer .col.right { text-align: right; }
+  .footer .col strong { color: #fff; display: block; font-size: 14.5px; }
+
+</style>
+</head>
+<body>
+<div class="standee">
+
+  <!-- ============== HEADER ============== -->
+  <div class="header">
+    <div class="header-row">
+      <div class="crest" title="Air University">
+        <img src="../assets/images/air-university-logo-1.png" alt="Air University" />
+      </div>
+      <div class="title-block">
+        <div class="with-logo">
+          <div class="shape-logo"><img src="../assets/images/logo.png" alt="ShapeOS" /></div>
+          <h1>ShapeOS</h1>
+        </div>
+        <div class="sub">Smart Home Automation &amp; Predictive Energy Optimization System</div>
+      </div>
+      <div class="crest" title="Department of Computer Science">
+        <img class="jpg-clip" src="../assets/images/dept%20of%20cs.jpg" alt="Department of Computer Science" />
+      </div>
+    </div>
+
+    <div class="team">
+      <div class="member"><div class="name">Muhammad Kamran</div><div class="id">Group Lead</div></div>
+      <div class="member"><div class="name">Moneeb Toor</div><div class="id">Co-Developer</div></div>
+      <div class="member"><div class="name">Aroosha Shafqat</div><div class="id">Co-Developer</div></div>
+    </div>
+    <div class="supervisor">Supervisor: <strong>Mr. Tariq Mehmood Danish</strong></div>
+  </div>
+
+  <!-- ============== SCOPE ============== -->
+  <div class="section scope">
+    <div class="h2">Scope</div>
+    <div class="badge"><img src="../assets/images/logo.png" alt="ShapeOS" /></div>
+    <p>
+      ShapeOS is an end-to-end smart-home platform that fuses real-time IoT control with an AI-driven
+      predictive energy optimization engine. Built on Flutter and Firebase with an ESP32 edge controller,
+      the system continuously monitors household appliances, learns usage patterns over a 14-day window
+      and commits enforceable peak-hour auto-off rules that the engine applies automatically. A
+      conversational AI agent powered by Google Gemini handles voice control, anomaly response and
+      room-level automation, while a profile-band safety detector guards against voltage surges, current
+      leakage, motion, smoke, flame and gas events. The result is a single intelligent operating layer
+      for the modern home that lowers bills, prevents hazards and runs itself.
+    </p>
+  </div>
+
+  <!-- ============== ARCHITECTURE (SVG, OfficeShield-style layout) ============== -->
+  <div class="section">
+    <div class="h2">Architecture</div>
+    <div class="arch-wrap">
+
+      <svg viewBox="0 0 880 560" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Inter, Arial, sans-serif">
+        <!-- Arrow markers -->
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#1f5fc8"/>
+          </marker>
+          <marker id="arrThin" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#1a2233"/>
+          </marker>
+        </defs>
+
+        <!-- ============ GROUP 1: Smart Home Environment ============ -->
+        <g>
+          <rect x="14" y="80" width="240" height="430" rx="14" ry="14"
+                fill="#fafcff" stroke="#1a2233" stroke-width="1.4" stroke-dasharray="0"/>
+          <text x="134" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#122a55">Smart Home Environment</text>
+          <text x="134" y="124" text-anchor="middle" font-size="11" fill="#4a5a73">(Residential / Office Site)</text>
+
+          <!-- Appliances label -->
+          <text x="40" y="148" font-size="10.5" font-weight="700" fill="#122a55" letter-spacing="1">APPLIANCES</text>
+
+          <!-- Fan -->
+          <g>
+            <rect x="32" y="156" width="92" height="56" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <circle cx="58" cy="184" r="14" fill="#eaf2ff" stroke="#1f5fc8" stroke-width="1.2"/>
+            <path d="M58 174 Q60 184 58 194 M48 184 Q58 182 68 184" stroke="#1f5fc8" stroke-width="1.4" fill="none"/>
+            <text x="110" y="180" text-anchor="end" font-size="10" font-weight="700" fill="#122a55">Fan</text>
+            <text x="110" y="194" text-anchor="end" font-size="9" fill="#4a5a73">DC · 12V</text>
+            <text x="110" y="206" text-anchor="end" font-size="9" fill="#4a5a73">Relay 1</text>
+          </g>
+
+          <!-- Bulb -->
+          <g>
+            <rect x="138" y="156" width="92" height="56" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <circle cx="164" cy="182" r="10" fill="#fff4d0" stroke="#b88500" stroke-width="1.2"/>
+            <rect x="161" y="192" width="6" height="4" fill="#b88500"/>
+            <text x="216" y="180" text-anchor="end" font-size="10" font-weight="700" fill="#122a55">Bulb</text>
+            <text x="216" y="194" text-anchor="end" font-size="9" fill="#4a5a73">AC · 220V</text>
+            <text x="216" y="206" text-anchor="end" font-size="9" fill="#4a5a73">Relay 2</text>
+          </g>
+
+          <!-- Pump -->
+          <g>
+            <rect x="32" y="220" width="92" height="56" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <circle cx="58" cy="248" r="13" fill="#e0f7f5" stroke="#0e8c80" stroke-width="1.2"/>
+            <path d="M51 248 L65 248 M58 241 L58 255" stroke="#0e8c80" stroke-width="1.4"/>
+            <text x="110" y="244" text-anchor="end" font-size="10" font-weight="700" fill="#122a55">Pump</text>
+            <text x="110" y="258" text-anchor="end" font-size="9" fill="#4a5a73">DC · 12V</text>
+            <text x="110" y="270" text-anchor="end" font-size="9" fill="#4a5a73">Relay 3</text>
+          </g>
+
+          <!-- Bell -->
+          <g>
+            <rect x="138" y="220" width="92" height="56" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <path d="M158 252 Q164 240 170 252 L170 256 L158 256 Z" fill="#fff" stroke="#c0392b" stroke-width="1.3"/>
+            <circle cx="164" cy="260" r="2" fill="#c0392b"/>
+            <text x="216" y="244" text-anchor="end" font-size="10" font-weight="700" fill="#122a55">Bell</text>
+            <text x="216" y="258" text-anchor="end" font-size="9" fill="#4a5a73">AC · 220V</text>
+            <text x="216" y="270" text-anchor="end" font-size="9" fill="#4a5a73">Relay 4</text>
+          </g>
+
+          <!-- Sensors label -->
+          <text x="40" y="306" font-size="10.5" font-weight="700" fill="#122a55" letter-spacing="1">SENSORS</text>
+
+          <!-- Sensor row 1 -->
+          <g>
+            <rect x="32" y="314" width="92" height="40" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <text x="78" y="332" text-anchor="middle" font-size="10" font-weight="700" fill="#122a55">PIR Motion</text>
+            <text x="78" y="346" text-anchor="middle" font-size="9" fill="#4a5a73">Auto-light</text>
+          </g>
+          <g>
+            <rect x="138" y="314" width="92" height="40" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <text x="184" y="332" text-anchor="middle" font-size="10" font-weight="700" fill="#122a55">Smoke / Gas</text>
+            <text x="184" y="346" text-anchor="middle" font-size="9" fill="#4a5a73">MQ-2</text>
+          </g>
+          <!-- Sensor row 2 -->
+          <g>
+            <rect x="32" y="362" width="92" height="40" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <text x="78" y="380" text-anchor="middle" font-size="10" font-weight="700" fill="#122a55">Flame IR</text>
+            <text x="78" y="394" text-anchor="middle" font-size="9" fill="#4a5a73">Hazard cut</text>
+          </g>
+          <g>
+            <rect x="138" y="362" width="92" height="40" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.2"/>
+            <text x="184" y="380" text-anchor="middle" font-size="10" font-weight="700" fill="#122a55">V / I Meter</text>
+            <text x="184" y="394" text-anchor="middle" font-size="9" fill="#4a5a73">ZMPT + ACS</text>
+          </g>
+
+          <!-- Note -->
+          <rect x="32" y="420" width="198" height="74" rx="8" fill="#fff5f5" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="4 3"/>
+          <text x="131" y="440" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c0392b">Hazard Events (demo)</text>
+          <text x="131" y="456" text-anchor="middle" font-size="9.5" fill="#7a3a3a">Smoke · Flame · Gas leak ·</text>
+          <text x="131" y="470" text-anchor="middle" font-size="9.5" fill="#7a3a3a">Voltage surge · Current leak</text>
+          <text x="131" y="486" text-anchor="middle" font-size="9.5" fill="#7a3a3a">trigger profile-band auto-cut</text>
+        </g>
+
+        <!-- ============ TOP: Wi-Fi Router ============ -->
+        <g>
+          <rect x="290" y="20" width="130" height="56" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.3"/>
+          <rect x="312" y="32" width="86" height="22" rx="3" fill="#dfe7f4" stroke="#1a2233" stroke-width="1"/>
+          <line x1="318" y1="46" x2="318" y2="58" stroke="#1a2233" stroke-width="1.4"/>
+          <line x1="338" y1="46" x2="338" y2="60" stroke="#1a2233" stroke-width="1.4"/>
+          <text x="355" y="68" text-anchor="middle" font-size="10" fill="#4a5a73">Home Wi-Fi / Router</text>
+        </g>
+        <text x="430" y="40" font-size="10" font-weight="700" fill="#1f5fc8">Internet Uplink</text>
+
+        <!-- ============ GROUP 2: ESP32 Edge Controller ============ -->
+        <g>
+          <rect x="280" y="100" width="280" height="410" rx="14" ry="14"
+                fill="#fafcff" stroke="#1a2233" stroke-width="1.4"/>
+          <text x="420" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#122a55">ShapeOS Edge Controller</text>
+          <text x="420" y="144" text-anchor="middle" font-size="11" fill="#4a5a73">(ESP32 · Wi-Fi MCU)</text>
+
+          <!-- ESP32 board illustration -->
+          <g transform="translate(310,160)">
+            <rect x="0" y="0" width="220" height="80" rx="6" fill="#0b3a6b" stroke="#0a2a4d" stroke-width="1.2"/>
+            <rect x="78" y="10" width="64" height="36" rx="3" fill="#1a2233" stroke="#404a5e"/>
+            <text x="110" y="32" text-anchor="middle" font-size="10" font-weight="700" fill="#cfd9e8">ESP32</text>
+            <text x="110" y="44" text-anchor="middle" font-size="7.5" fill="#8ea7c5">WROOM-32</text>
+            <!-- pins -->
+            <g fill="#cfd9e8">
+              <rect x="6" y="6" width="3" height="3"/><rect x="6" y="14" width="3" height="3"/>
+              <rect x="6" y="22" width="3" height="3"/><rect x="6" y="30" width="3" height="3"/>
+              <rect x="6" y="38" width="3" height="3"/><rect x="6" y="46" width="3" height="3"/>
+              <rect x="6" y="54" width="3" height="3"/><rect x="6" y="62" width="3" height="3"/>
+              <rect x="6" y="70" width="3" height="3"/>
+              <rect x="211" y="6" width="3" height="3"/><rect x="211" y="14" width="3" height="3"/>
+              <rect x="211" y="22" width="3" height="3"/><rect x="211" y="30" width="3" height="3"/>
+              <rect x="211" y="38" width="3" height="3"/><rect x="211" y="46" width="3" height="3"/>
+              <rect x="211" y="54" width="3" height="3"/><rect x="211" y="62" width="3" height="3"/>
+              <rect x="211" y="70" width="3" height="3"/>
+            </g>
+            <!-- LED -->
+            <circle cx="160" cy="60" r="2.5" fill="#00c2a8"/>
+            <circle cx="170" cy="60" r="2.5" fill="#f5a623"/>
+          </g>
+
+          <!-- Interfaces labels -->
+          <text x="320" y="260" font-size="10" fill="#4a5a73">Interface 1: GPIO &amp; ADC</text>
+          <text x="320" y="272" font-size="10" fill="#4a5a73">Interface 2: Wi-Fi (Cloud)</text>
+
+          <!-- Duty list -->
+          <g>
+            <rect x="304" y="288" width="232" height="34" rx="6" fill="#fff" stroke="#1a2233" stroke-width="1.1"/>
+            <text x="420" y="309" text-anchor="middle" font-size="11" font-weight="600" fill="#122a55">1. Sensor Telemetry Capture</text>
+          </g>
+          <g>
+            <rect x="304" y="328" width="232" height="34" rx="6" fill="#fff" stroke="#1a2233" stroke-width="1.1"/>
+            <text x="420" y="349" text-anchor="middle" font-size="11" font-weight="600" fill="#122a55">2. Relay Control &amp; Switching</text>
+          </g>
+          <g>
+            <rect x="304" y="368" width="232" height="34" rx="6" fill="#fff" stroke="#1a2233" stroke-width="1.1"/>
+            <text x="420" y="389" text-anchor="middle" font-size="11" font-weight="600" fill="#122a55">3. V / I / P Streaming &rarr; RTDB</text>
+          </g>
+          <g>
+            <rect x="304" y="408" width="232" height="34" rx="6" fill="#fff" stroke="#1a2233" stroke-width="1.1"/>
+            <text x="420" y="429" text-anchor="middle" font-size="11" font-weight="600" fill="#122a55">4. Cloud Command Listener</text>
+          </g>
+          <g>
+            <rect x="304" y="448" width="232" height="34" rx="6" fill="#fff" stroke="#1a2233" stroke-width="1.1"/>
+            <text x="420" y="469" text-anchor="middle" font-size="11" font-weight="600" fill="#122a55">5. Local Safety Auto-Cut</text>
+          </g>
+        </g>
+
+        <!-- Arrows: Smart Home <-> ESP32 -->
+        <line x1="254" y1="200" x2="278" y2="200" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+        <line x1="254" y1="260" x2="278" y2="260" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+        <line x1="254" y1="380" x2="278" y2="380" stroke="#c0392b" stroke-width="2.2" marker-end="url(#arr)" stroke-dasharray="6 4"/>
+
+        <!-- ESP32 -> Router (up) -->
+        <line x1="355" y1="100" x2="355" y2="78" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+
+        <!-- Router -> Cloud (right) -->
+        <line x1="420" y1="48" x2="610" y2="48" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+
+        <!-- ============ GROUP 3: Cloud + Apps ============ -->
+        <g>
+          <rect x="580" y="80" width="290" height="430" rx="14" ry="14"
+                fill="#fafcff" stroke="#1a2233" stroke-width="1.4"/>
+          <text x="725" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#122a55">Cloud Services &amp; Apps</text>
+          <text x="725" y="124" text-anchor="middle" font-size="11" fill="#4a5a73">Firebase, Gemini and Flutter</text>
+
+          <!-- Firebase Cloud Backend: clean rounded rectangle with small cloud icon -->
+          <g>
+            <rect x="600" y="144" width="250" height="146" rx="10" ry="10"
+                  fill="#eef4ff" stroke="#1f5fc8" stroke-width="1.4"/>
+            <!-- Small cloud icon -->
+            <g transform="translate(610,154)">
+              <path d="M4 12 C4 8 8 6 11 8 C12 4 18 4 19 8 C22 7 24 10 23 12 C25 13 25 16 22 16 L6 16 C3 16 3 13 4 12 Z"
+                    fill="#1f5fc8"/>
+            </g>
+            <text x="640" y="166" font-size="12" font-weight="700" fill="#122a55">Firebase Cloud Backend</text>
+            <text x="612" y="188" font-size="10.5" fill="#1a2233">Authentication (Anonymous Admin)</text>
+            <text x="612" y="204" font-size="10.5" fill="#1a2233">Realtime Database (live device state)</text>
+            <text x="612" y="220" font-size="10.5" fill="#1a2233">Firestore (rules, logs, billing)</text>
+            <text x="612" y="236" font-size="10.5" fill="#1a2233">FCM Push Notifications</text>
+            <text x="612" y="252" font-size="10.5" fill="#1a2233">Cloud Functions (scheduled jobs)</text>
+            <text x="612" y="268" font-size="10.5" fill="#1a2233">Gemini 2.5 Agent Brain</text>
+          </g>
+
+          <!-- Connector arrow: Cloud to apps row -->
+          <line x1="725" y1="290" x2="725" y2="312" stroke="#1f5fc8" stroke-width="2.2" marker-end="url(#arr)"/>
+          <text x="735" y="306" font-size="9.5" font-weight="700" fill="#1f5fc8">Live sync</text>
+
+          <!-- Mobile / Admin App -->
+          <g>
+            <rect x="600" y="316" width="120" height="110" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.3"/>
+            <rect x="614" y="328" width="92" height="64" rx="4" fill="#eaf2ff" stroke="#1f5fc8" stroke-width="0.9"/>
+            <line x1="614" y1="344" x2="706" y2="344" stroke="#1f5fc8" stroke-width="0.7"/>
+            <rect x="620" y="352" width="36" height="14" rx="2" fill="#1f5fc8" opacity=".25"/>
+            <rect x="662" y="352" width="40" height="14" rx="2" fill="#1f5fc8" opacity=".25"/>
+            <rect x="620" y="370" width="82" height="14" rx="2" fill="#1f5fc8" opacity=".15"/>
+            <text x="660" y="410" text-anchor="middle" font-size="10.5" font-weight="700" fill="#122a55">Flutter Mobile App</text>
+            <text x="660" y="422" text-anchor="middle" font-size="9" fill="#4a5a73">Admin Dashboard</text>
+          </g>
+
+          <!-- AI Agent / Voice -->
+          <g>
+            <rect x="730" y="316" width="120" height="110" rx="8" fill="#fff" stroke="#1a2233" stroke-width="1.3"/>
+            <circle cx="790" cy="354" r="22" fill="#eaf6fa" stroke="#0e8c80" stroke-width="1.3"/>
+            <path d="M783 350 Q790 340 797 350 Q795 366 790 366 Q785 366 783 350 Z" fill="#0e8c80"/>
+            <rect x="775" y="374" width="30" height="4" rx="2" fill="#0e8c80"/>
+            <text x="790" y="410" text-anchor="middle" font-size="10.5" font-weight="700" fill="#122a55">Gemini AI Agent</text>
+            <text x="790" y="422" text-anchor="middle" font-size="9" fill="#4a5a73">Voice and Chat</text>
+          </g>
+
+          <!-- Optimization Engine -->
+          <g>
+            <rect x="600" y="442" width="250" height="58" rx="8" fill="#fff5e6" stroke="#b88500" stroke-width="1.2"/>
+            <text x="725" y="462" text-anchor="middle" font-size="11" font-weight="700" fill="#7a5a00">Predictive Optimization Engine</text>
+            <text x="725" y="478" text-anchor="middle" font-size="9.5" fill="#7a5a00">14 day pattern analysis generates peak hour rules</text>
+            <text x="725" y="492" text-anchor="middle" font-size="9.5" fill="#7a5a00">Enforced by Cloud Functions and the agent ticker</text>
+          </g>
+        </g>
+
+        <!-- Arrows: ESP32 controller (right edge x=560) to Firebase Cloud Backend (left edge x=600) -->
+        <line x1="560" y1="190" x2="598" y2="190" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+        <text x="579" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1f5fc8">Telemetry</text>
+
+        <line x1="598" y1="240" x2="560" y2="240" stroke="#1f5fc8" stroke-width="2.4" marker-end="url(#arr)"/>
+        <text x="579" y="254" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1f5fc8">Commands</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============== OUTPUT (UI mock previews) ============== -->
+  <div class="section">
+    <div class="h2">Output</div>
+    <div class="output-grid">
+
+      <!-- Mock 1: Dashboard -->
+      <div class="mock">
+        <span class="mock-tab">Dashboard</span>
+        <div class="m-dash">
+          <div class="row">
+            <div class="card"><div>Live Power</div><div class="v">847 W</div></div>
+            <div class="card"><div>Today</div><div class="v">4.2 kWh</div></div>
+            <div class="card"><div>Day Bill</div><div class="v">₨ 312</div></div>
+          </div>
+          <div class="card">
+            <div>Last 24h</div>
+            <div class="bars" style="margin-top:4px;">
+              <span style="height:40%"></span><span style="height:30%"></span>
+              <span style="height:55%"></span><span style="height:70%"></span>
+              <span style="height:88%"></span><span style="height:60%"></span>
+              <span style="height:45%"></span><span style="height:35%"></span>
+              <span style="height:50%"></span><span style="height:75%"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mock 2: Optimization -->
+      <div class="mock">
+        <span class="mock-tab">Optimization</span>
+        <div class="m-dash" style="background: linear-gradient(180deg,#0b6a8c 0,#0b6a8c 38px,#f6f9fc 38px);">
+          <div class="card" style="text-align:center;">
+            <div>Projected Savings</div>
+            <div class="v" style="font-size:24px;">22%</div>
+            <div style="font-size:9px;color:#5a6a73;">₨ 218 lower vs last cycle</div>
+          </div>
+          <div class="card" style="font-size:9.5px;">
+            Bulb · 18–23h auto-off <span style="float:right;color:#1f8a4c;font-weight:700;">ACTIVE</span><br/>
+            Pump · 19–22h auto-off <span style="float:right;color:#1f8a4c;font-weight:700;">ACTIVE</span><br/>
+            Fan · idle auto-off <span style="float:right;color:#1f8a4c;font-weight:700;">ACTIVE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mock 3: Agent / Voice -->
+      <div class="mock">
+        <span class="mock-tab">AI Agent</span>
+        <div class="m-dash" style="background: linear-gradient(180deg,#0e8c80 0,#0e8c80 38px,#f6f9fc 38px);">
+          <div class="card" style="font-size:9.5px;">
+            <b>You:</b> Turn off bulb in lounge<br/>
+            <b style="color:#0e8c80;">Agent:</b> Done — saved 18W.
+          </div>
+          <div class="card" style="font-size:9.5px;">
+            <b>You:</b> What was the spike at 7 PM?<br/>
+            <b style="color:#0e8c80;">Agent:</b> Pump hit 4.1A — cut for safety.
+          </div>
+          <div class="card" style="text-align:center;background:#0e8c80;color:#fff;">
+            <div style="font-size:9.5px;font-weight:700;">Wake-word listening</div>
+            <div style="font-size:8.5px;opacity:.8;">say "Shape" to begin</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============== KEY FEATURES ============== -->
+  <div class="section">
+    <div class="h2">Key Features</div>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+        <div>
+          <div class="ft">Predictive Energy Optimization</div>
+          <div class="fd">14-day usage analysis surfaces peak-hour waste and commits enforceable auto-off rules.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+        <div>
+          <div class="ft">Conversational AI Agent</div>
+          <div class="fd">Gemini 2.5 tool-calling brain controls devices, sets thresholds and remembers facts.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <div>
+          <div class="ft">Room-Wise Control &amp; Bills</div>
+          <div class="fd">Group devices by room, split monthly bills and track per-room consumption history.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 1 1 16 0v4a4 4 0 0 1-4 4h-1v-7h5"/><path d="M4 16a4 4 0 0 0 4 4h1v-7H4"/></svg></div>
+        <div>
+          <div class="ft">Wake-Word Voice Mode</div>
+          <div class="fd">Hands-free continuous conversation — natural commands, TTS replies, exit phrases.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><path d="M12 9v6"/><circle cx="12" cy="18" r="1" fill="currentColor"/></svg></div>
+        <div>
+          <div class="ft">Anomaly Auto-Cut</div>
+          <div class="fd">Profile-band detector triggers cut-offs on voltage surges and current leakage.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div>
+          <div class="ft">Tariff-Aware Billing</div>
+          <div class="fd">Off-peak 55 PKR / kWh, peak 70 PKR / kWh — live daily and monthly bill estimates.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></div>
+        <div>
+          <div class="ft">Full Action Audit</div>
+          <div class="fd">Every manual, automated and agent-driven change logged with reason and source.</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <div class="ft">Live Safety Sensors</div>
+          <div class="fd">Motion, smoke, flame and gas alerts with FCM push and on-screen banners.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TOOLS & TECHNOLOGIES (official brand logos) ============== -->
+  <div class="section">
+    <div class="h2">Tools &amp; Technologies</div>
+    <div class="tools">
+
+      <!-- Flutter -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Flutter">
+            <path fill="#54C5F8" d="M14.314 0L2.3 12l3.7 3.7L21.684.013z"/>
+            <path fill="#01579B" d="M14.328 11.072L7.857 17.541l3.183 3.184 9.66-9.66z"/>
+            <path fill="#40D0FD" d="M11.04 20.725l2.82 2.82 7.84-7.84-2.82-2.82z"/>
+            <path fill="#01579B" d="M11.04 20.725l4.726-1.635 1.583-1.6-3.49-3.483z" opacity=".5"/>
+          </svg>
+        </div>
+        <div class="tname">Flutter</div>
+      </div>
+
+      <!-- Dart -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Dart">
+            <path fill="#00D2B8" d="M4.105 4.105S9.158 1.58 11.684.316C12.215.04 12.71-.025 13.165.092c.766.197 1.434.832 1.677 1.077l9.158 9.16v9.789h-4.263V24H9.789l-9.61-9.821C-.706 11.46.495 8.21 4.105 4.105z"/>
+            <path fill="#22D3C5" d="M19.737 19.737L4.263 4.263 4.105 4.105c-3.61 4.105-4.81 7.355-3.926 10.074L9.789 24h9.948v-4.263z" opacity=".7"/>
+            <path fill="#0081C6" d="M9.789 24h9.948v-4.263H14.21z" opacity=".5"/>
+            <path fill="#00D2B8" d="M19.737 19.737L9.789 24h9.948z" opacity=".4"/>
+          </svg>
+        </div>
+        <div class="tname">Dart</div>
+      </div>
+
+      <!-- Firebase -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Firebase">
+            <path fill="#FFA000" d="M3.89 15.673L6.255.461A.542.542 0 0 1 7.27.289L9.813 5.04z"/>
+            <path fill="#F57C00" d="M14.3 7.148l-1.82-3.482a.542.542 0 0 0-.96 0L3.89 15.673 14.3 7.148z"/>
+            <path fill="#FFCA28" d="M20.685 19.364L18.433 5.365a.543.543 0 0 0-.918-.295L3.89 15.673l7.857 4.428a1.62 1.62 0 0 0 1.587 0z"/>
+            <path fill="#FFA000" d="M3.89 15.673l7.857 4.428a1.62 1.62 0 0 0 1.587 0L20.685 19.364 14.3 7.148z" opacity=".3"/>
+          </svg>
+        </div>
+        <div class="tname">Firebase</div>
+      </div>
+
+      <!-- Google Cloud -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Google Cloud">
+            <path fill="#EA4335" d="M15.06 7.13l1.5-1.5.1-.63A6.74 6.74 0 0 0 5.81 8.86c.15-.1.45-.06.45-.06l3-.49s.15-.25.23-.24a3.74 3.74 0 0 1 5.6-.97z"/>
+            <path fill="#4285F4" d="M19.27 8.83a6.75 6.75 0 0 0-2.03-3.28L15.1 7.7a3.74 3.74 0 0 1 1.37 2.97v.37a1.87 1.87 0 0 1 0 3.74H12.7l-.37.38v2.24l.37.36h3.74a4.86 4.86 0 0 0 2.84-8.93z"/>
+            <path fill="#34A853" d="M8.96 17.76h3.74V14.78H8.96A1.86 1.86 0 0 1 8 14.5l-.53.27-1.51 1.5-.13.5a4.83 4.83 0 0 0 3.13 1z"/>
+            <path fill="#FBBC05" d="M8.96 7.92a4.86 4.86 0 0 0-2.93 8.71l2.17-2.18a1.87 1.87 0 1 1 2.47-2.47l2.17-2.17a4.85 4.85 0 0 0-3.88-1.9z"/>
+          </svg>
+        </div>
+        <div class="tname">Google Cloud</div>
+      </div>
+
+      <!-- Gemini AI -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Google Gemini">
+            <defs>
+              <linearGradient id="gem-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4796E3"/>
+                <stop offset="55%" stop-color="#9168C0"/>
+                <stop offset="100%" stop-color="#F26B5F"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#gem-grad)" d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/>
+          </svg>
+        </div>
+        <div class="tname">Gemini AI</div>
+      </div>
+
+      <!-- ESP32 (Espressif) -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="ESP32">
+            <rect x="5" y="5" width="14" height="14" rx="1.6" fill="#E7352C"/>
+            <rect x="7.4" y="7.4" width="9.2" height="9.2" fill="none" stroke="#ffffff" stroke-width="0.7"/>
+            <text x="12" y="13.6" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="3.2" font-weight="700" fill="#ffffff">ESP32</text>
+            <g stroke="#E7352C" stroke-width="1.1" stroke-linecap="round">
+              <line x1="2.8" y1="8" x2="5" y2="8"/>
+              <line x1="2.8" y1="10.5" x2="5" y2="10.5"/>
+              <line x1="2.8" y1="13" x2="5" y2="13"/>
+              <line x1="2.8" y1="15.5" x2="5" y2="15.5"/>
+              <line x1="19" y1="8" x2="21.2" y2="8"/>
+              <line x1="19" y1="10.5" x2="21.2" y2="10.5"/>
+              <line x1="19" y1="13" x2="21.2" y2="13"/>
+              <line x1="19" y1="15.5" x2="21.2" y2="15.5"/>
+            </g>
+          </svg>
+        </div>
+        <div class="tname">ESP32</div>
+      </div>
+
+      <!-- Arduino -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Arduino">
+            <path fill="#00979D" d="M22.4 12c0-2.38-1.85-4.32-4.11-4.32-.32 0-.65.03-.98.1-1.6.35-2.83 1.59-3.7 2.65-.5.6-.93 1.25-1.32 1.94-.18-.3-.38-.61-.6-.93-.81-1.24-2.13-3.09-4.11-3.66-.33-.07-.66-.1-.98-.1C4.38 7.68 2.53 9.62 2.53 12s1.85 4.32 4.11 4.32c.32 0 .65-.03.97-.1 1.6-.35 2.84-1.59 3.7-2.65.5-.6.93-1.25 1.32-1.94.18.3.38.61.6.93.81 1.25 2.13 3.09 4.11 3.67.33.07.66.1.98.1 2.26 0 4.11-1.94 4.11-4.32zM6.71 15.09c-.27.06-.51.08-.74.08-1.53 0-2.77-1.3-2.77-2.89s1.24-2.89 2.77-2.89c.23 0 .47.02.74.08 1.6.35 2.92 2.8 2.92 2.8s-1.32 2.46-2.92 2.81zm10.84 0c-.27.06-.51.08-.74.08-1.53 0-2.77-1.3-2.77-2.89s1.24-2.89 2.77-2.89c.23 0 .47.02.74.08 1.6.35 2.92 2.8 2.92 2.8s-1.32 2.46-2.92 2.81z"/>
+            <rect x="3.95" y="11.6" width="3" height="0.8" fill="#ffffff"/>
+            <rect x="5.05" y="10.5" width="0.8" height="3" fill="#ffffff"/>
+            <rect x="16.95" y="11.6" width="3" height="0.8" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div class="tname">Arduino IDE</div>
+      </div>
+
+      <!-- Android -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Android">
+            <path fill="#3DDC84" d="M17.523 15.341c-.551 0-.999-.449-.999-1 0-.551.448-.999.999-.999.551 0 .999.448.999.999 0 .551-.448 1-.999 1m-11.046 0c-.551 0-.999-.449-.999-1 0-.551.448-.999.999-.999.551 0 .999.448.999.999 0 .551-.448 1-.999 1m11.405-6.02 1.997-3.459a.416.416 0 0 0-.152-.568.416.416 0 0 0-.568.152l-2.022 3.503c-1.546-.706-3.283-1.099-5.137-1.099s-3.59.393-5.137 1.099L4.841 5.446a.416.416 0 0 0-.568-.152.416.416 0 0 0-.152.568l1.997 3.459C2.689 11.187.343 14.659 0 18.761h24c-.343-4.102-2.689-7.574-6.118-9.44"/>
+          </svg>
+        </div>
+        <div class="tname">Android</div>
+      </div>
+
+      <!-- GitHub -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub">
+            <path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </div>
+        <div class="tname">GitHub</div>
+      </div>
+
+      <!-- Figma -->
+      <div class="tool">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-label="Figma">
+            <path fill="#F24E1E" d="M8 0a4 4 0 0 0 0 8h4V0H8z"/>
+            <path fill="#FF7262" d="M12 0v8h4a4 4 0 0 0 0-8h-4z"/>
+            <path fill="#A259FF" d="M16 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            <path fill="#1ABCFE" d="M8 8a4 4 0 0 0 0 8h4V8H8z"/>
+            <path fill="#0ACF83" d="M8 24a4 4 0 0 0 4-4v-4H8a4 4 0 0 0 0 8z"/>
+          </svg>
+        </div>
+        <div class="tname">Figma</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============== FOOTER ============== -->
+  <div class="footer">
+    <div class="col">
+      <strong>Department of</strong>
+      Computer Science
+    </div>
+    <div class="col center">
+      <strong>Faculty of Computing &amp;</strong>
+      Artificial Intelligence
+    </div>
+    <div class="col right">
+      <strong>Air University</strong>
+      Islamabad
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

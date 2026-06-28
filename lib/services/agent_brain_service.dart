@@ -195,8 +195,9 @@ class AgentBrainService {
     );
     buf.writeln(
       "SENSORS (active=true means triggered right now):\n"
-      "  motion (PIR), smoke, flame, gas, "
-      "bulb_voltage_surge, bulb_autocut",
+      "  smoke, flame, gas, bulb_voltage_surge, bulb_autocut. "
+      "(The PIR motion sensor was removed — never claim motion "
+      "data exists, never act on it.)",
     );
 
     if (profile != null) {

@@ -9,8 +9,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'agent_action_logger.dart';
 import 'agent_memory_service.dart';
 import 'agent_mode_service.dart';
-import 'agent_orchestrator.dart';
+import 'energy_optimization_service.dart';
 import 'location_service.dart';
+import 'room_device_state_service.dart';
+import 'room_service.dart';
 import 'voice_service.dart';
 import 'weather_service.dart';
 
@@ -305,9 +307,11 @@ class AgentAutomationEngine {
     try {
       final now = DateTime.now();
       final weather = WeatherService.latest.value;
-      final lastMotion = AgentOrchestrator.lastMotionAt;
-      final motionRecent = lastMotion != null &&
-          now.difference(lastMotion) < const Duration(minutes: 4);
+      // PIR sensor was decommissioned, so we no longer gate any
+      // automation on motion. The time-of-day + weather rules
+      // below still fire normally; the fan auto-on path that
+      // required occupancy is now driven purely by weather.
+      const motionRecent = true;
 
       final snap =
           await FirebaseDatabase.instance.ref("appliances").get();
@@ -353,6 +357,79 @@ class AgentAutomationEngine {
         now: now,
         hour: hour,
       );
+
+      // Predictive peak-hour optimization — check every device
+      // currently ON against any committed peak-hour rule. If
+      // we're inside the peak window the engine cuts power and
+      // narrates the savings.
+      // Each room can have its own committed rule for the same
+      // device id. Iterate every active rule and fire one room
+      // at a time so we only cut the rooms whose admins opted in.
+      final allRooms = await RoomService.all();
+      for (final entry in state.entries) {
+        final deviceId = entry.key;
+        final isOn = entry.value;
+        final decisions = await EnergyOptimizationService
+            .shouldOptimizeNow(deviceId, isOn);
+        if (decisions.isEmpty) continue;
+
+        final roomsWithDevice = allRooms
+            .where((r) => r.deviceIds.contains(deviceId))
+            .map((r) => r.id)
+            .toList();
+
+        for (final decision in decisions) {
+          // If the room hasn't opted in, skip — defensive check.
+          if (decision.roomId.isNotEmpty) {
+            // Confirm the room currently has this device on at
+            // the room-virtual layer; if it's already off there
+            // (another rule or the user already cut it) skip.
+            final stillOn = await RoomDeviceStateService.get(
+                decision.roomId, deviceId);
+            if (!stillOn) continue;
+          }
+
+          final hh = DateTime.now().hour;
+          final hLabel = hh == 0
+              ? "12 AM"
+              : hh <= 12
+                  ? "$hh ${hh == 12 ? 'PM' : 'AM'}"
+                  : "${hh - 12} PM";
+          final dailySaving =
+              (decision.monthlySavingsPKR / 30).toStringAsFixed(0);
+
+          // Cut the device only inside this room.
+          if (decision.roomId.isNotEmpty) {
+            await RoomDeviceStateService.cutInRoom(
+              roomId: decision.roomId,
+              deviceId: deviceId,
+              roomsWithDevice: roomsWithDevice,
+            );
+            // Speak + log + push notification (no second physical
+            // toggle inside _autoAct since cutInRoom already
+            // recomputed /appliances/).
+            await _announceAndLog(
+              deviceId: deviceId,
+              deviceName: decision.deviceName,
+              reason:
+                  "Peak-hour optimization. ${decision.roomPhrase} · "
+                  "${decision.deviceName} switched off at $hLabel — "
+                  "saving you about ₨ $dailySaving today.",
+              turnedOn: false,
+            );
+          } else {
+            // No room context — fall back to the global path.
+            await _autoAct(
+              deviceId: deviceId,
+              deviceName: decision.deviceName,
+              turnOn: false,
+              reason:
+                  "Peak-hour optimization. ${decision.deviceName} switched off at $hLabel "
+                  "— saving you about ₨ $dailySaving today.",
+            );
+          }
+        }
+      }
     } catch (e) {
       debugPrint("AgentAutomationEngine tick failed: $e");
     }
@@ -537,6 +614,50 @@ class AgentAutomationEngine {
       );
     } catch (e) {
       debugPrint("AgentAutomationEngine action failed: $e");
+    }
+  }
+
+  /// Same effects as [_autoAct] (speak + notify + log + memory)
+  /// EXCEPT skip the `/appliances/{id}` write — used by the
+  /// per-room peak-hour cut path where [RoomDeviceStateService]
+  /// has already updated both the room state and the shared
+  /// appliance flag.
+  static Future<void> _announceAndLog({
+    required String deviceId,
+    required String deviceName,
+    required String reason,
+    required bool turnedOn,
+  }) async {
+    try {
+      _lastActionAt[deviceId] = DateTime.now();
+      _briefingSink?.add(BriefingAction(
+        deviceName: deviceName,
+        turnedOn: turnedOn,
+        reason: reason,
+      ));
+      await VoiceService.speak(reason);
+      await _showNotification(
+        title:
+            "$deviceName ${turnedOn ? "turned ON" : "turned OFF"}",
+        body: reason,
+      );
+      await AgentActionLogger.log(
+        deviceId: deviceId,
+        deviceName: deviceName,
+        action: turnedOn ? "on" : "off",
+        reason: reason,
+        trigger: "energy_optimizer",
+      );
+      final stamp = DateTime.now()
+          .toIso8601String()
+          .substring(0, 16)
+          .replaceAll(":", "");
+      await AgentMemoryService.remember(
+        "auto_${deviceId}_$stamp",
+        "${turnedOn ? 'Turned on' : 'Turned off'} $deviceName: $reason",
+      );
+    } catch (e) {
+      debugPrint("AgentAutomationEngine announceAndLog failed: $e");
     }
   }
 

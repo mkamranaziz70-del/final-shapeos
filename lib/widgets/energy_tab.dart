@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../services/dashboard_nav_service.dart';
+
 class EnergyTab extends StatelessWidget {
   const EnergyTab({super.key});
 
@@ -40,6 +42,11 @@ class EnergyTab extends StatelessWidget {
           children: [
             /// FIXED TOP OFFSET (CRITICAL)
             SizedBox(height: MediaQuery.of(context).padding.top),
+
+            /// ================= AI OPTIMIZATION CTA =================
+            _AiReportCta(),
+
+            const SizedBox(height: 16),
 
             /// ================= TODAY =================
             const Text(
@@ -519,3 +526,77 @@ class _ChartContainer extends StatelessWidget {
     );
   }
 }
+
+
+/// =========================================================
+/// AI OPTIMIZATION REPORT CTA
+/// =========================================================
+/// Top-of-screen banner that pushes the user from raw energy
+/// data into the predictive optimization journey. Tapping it
+/// jumps to the Optimization tab via DashboardNavService.
+class _AiReportCta extends StatelessWidget {
+  static const _green = Color(0xFF24E0A0);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: () => DashboardNavService.switchTo(DashboardTab.optimization),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0E7C5C), Color(0xFF065244)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: _green.withOpacity(0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_graph_rounded, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "View AI Optimization Report",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    "See which devices waste energy in peak hours and let the agent optimize them.",
+                    style: TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.35),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

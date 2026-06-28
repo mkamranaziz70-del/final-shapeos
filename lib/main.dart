@@ -88,7 +88,18 @@ Future<void> main() async {
   String? token = await FirebaseMessaging.instance.getToken();
   print("📱 FCM TOKEN: $token");
 
-  final user = FirebaseAuth.instance.currentUser;
+  // 🛂 ADMIN-ONLY MODE — single anonymous Firebase user. We
+  //    sign in silently so the app opens directly to the admin
+  //    dashboard. No login / signup screens are ever shown.
+  var user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    try {
+      final cred = await FirebaseAuth.instance.signInAnonymously();
+      user = cred.user;
+    } catch (e) {
+      print("Anonymous sign-in failed: $e");
+    }
+  }
 
   if (user != null && token != null) {
     await FirebaseFirestore.instance
@@ -96,6 +107,9 @@ Future<void> main() async {
         .doc(user.uid)
         .set({
       "fcmToken": token,
+      "role": "admin",
+      "agentProfileCompleted": true,
+      "firstLoginCompleted": true,
     }, SetOptions(merge: true));
   }
 

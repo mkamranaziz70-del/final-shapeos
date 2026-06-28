@@ -10,10 +10,18 @@ exports.securityAlertTrigger = functions.database
     const before = change.before.val();
     const after = change.after.val();
 
+    const alertType = context.params.alertType;
+
+    // 🚫 Motion sensor was decommissioned — never push a
+    //    motion notification even if a stale value flips
+    //    in the database.
+    if (typeof alertType === "string" &&
+        alertType.toLowerCase() === "motion") {
+      return null;
+    }
+
     // Only send when false -> true
     if (!before && after === true) {
-
-      const alertType = context.params.alertType;
 
       const title = `${alertType.toUpperCase()} ALERT`;
       const body = `Security issue detected: ${alertType}`;

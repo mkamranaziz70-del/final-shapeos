@@ -33,17 +33,16 @@ class DemoSeederService {
   static Future<SeedReport> seedAll() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
-      throw StateError("DemoSeeder requires a logged-in user.");
+      throw StateError("DemoSeeder requires a signed-in admin.");
     }
 
     final report = SeedReport();
 
-    await _seedFakeRoommates(report);
+    await _seedAdminRooms(report);
     await _seedEnergyHistory(report);
     await _seedAnomalies(uid, report);
     await _seedAgentActions(uid, report);
     await _seedBillingHistory(report);
-    await _ensureCurrentUserHasRoom(uid, report);
 
     return report;
   }
@@ -52,21 +51,32 @@ class DemoSeederService {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    // Fake users (only those prefixed with demo_)
-    final fakeUsers = await _fs
-        .collection("users")
-        .where(FieldPath.documentId,
-            whereIn: _demoUids().take(10).toList())
-        .get();
-    for (final d in fakeUsers.docs) {
-      await d.reference.delete();
+    // Demo rooms.
+    final demoRoomIds = const [
+      "demo_room_kamran",
+      "demo_room_ali",
+      "demo_room_zara",
+    ];
+    for (final id in demoRoomIds) {
+      try {
+        await _fs.collection("rooms").doc(id).delete();
+      } catch (_) {}
     }
 
-    // Energy daily of last 30 days.
+    // Legacy fake-user docs from previous seeder versions.
+    for (final uid in _demoUids()) {
+      try {
+        await _fs.collection("users").doc(uid).delete();
+      } catch (_) {}
+    }
+
+    // Energy daily of last 35 days.
     for (var i = 0; i < 35; i++) {
       final day = DateTime.now().subtract(Duration(days: i));
       final id = _yyyymmdd(day);
-      await _fs.collection("energy_daily").doc(id).delete();
+      try {
+        await _fs.collection("energy_daily").doc(id).delete();
+      } catch (_) {}
     }
 
     // Anomalies for current user.
@@ -94,76 +104,40 @@ class DemoSeederService {
         "demo_bilal_ahmed",
       ];
 
-  static Future<void> _seedFakeRoommates(SeedReport r) async {
-    final mates = [
+  /// Seed the canonical 3 admin-managed rooms used in the panel
+  /// demo. Idempotent — re-running overwrites the same doc IDs
+  /// rather than creating duplicates.
+  static Future<void> _seedAdminRooms(SeedReport r) async {
+    final rooms = [
       {
-        "uid": "demo_ali_hassan",
-        "fullName": "Ali Hassan",
-        "email": "ali.hassan@demo.shapeos",
-        "room": "Bedroom",
-        "selectedDevices": ["1", "2"],
-        "agentProfileCompleted": true,
-        "firstLoginCompleted": true,
-        "isDemoUser": true,
-        "avatarColor": "0xFF1F8AC0",
+        "id": "demo_room_kamran",
+        "name": "Kamran's Bedroom",
+        "occupant": "Kamran",
+        "deviceIds": ["1", "2"], // Fan + Bulb
       },
       {
-        "uid": "demo_zara_khan",
-        "fullName": "Zara Khan",
-        "email": "zara.khan@demo.shapeos",
-        "room": "Living Room",
-        "selectedDevices": ["1", "4"],
-        "agentProfileCompleted": true,
-        "firstLoginCompleted": true,
-        "isDemoUser": true,
-        "avatarColor": "0xFFE07A5F",
+        "id": "demo_room_ali",
+        "name": "Ali's Lounge",
+        "occupant": "Ali",
+        "deviceIds": ["1", "4"], // Fan + Bell
       },
       {
-        "uid": "demo_bilal_ahmed",
-        "fullName": "Bilal Ahmed",
-        "email": "bilal.ahmed@demo.shapeos",
-        "room": "Kitchen",
-        "selectedDevices": ["3"],
-        "agentProfileCompleted": true,
-        "firstLoginCompleted": true,
-        "isDemoUser": true,
-        "avatarColor": "0xFF81B29A",
+        "id": "demo_room_zara",
+        "name": "Zara's Kitchen",
+        "occupant": "Zara",
+        "deviceIds": ["3"], // Pump
       },
     ];
-    for (final m in mates) {
-      final uid = m["uid"] as String;
-      await _fs.collection("users").doc(uid).set(m, SetOptions(merge: true));
+    for (final room in rooms) {
+      final id = room["id"] as String;
+      await _fs.collection("rooms").doc(id).set({
+        "name": room["name"],
+        "occupant": room["occupant"],
+        "deviceIds": room["deviceIds"],
+        "isDemoSeed": true,
+        "createdAt": FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
       r.fakeRoommates++;
-    }
-  }
-
-  // =========================================================
-  // CURRENT USER HOUSEKEEPING
-  // =========================================================
-  static Future<void> _ensureCurrentUserHasRoom(
-      String uid, SeedReport r) async {
-    final me = await _fs.collection("users").doc(uid).get();
-    final data = me.data() ?? {};
-    final patch = <String, dynamic>{};
-    if ((data["room"] ?? "").toString().isEmpty) {
-      patch["room"] = "Lounge";
-    }
-    final selected = (data["selectedDevices"] is List)
-        ? List<String>.from(data["selectedDevices"])
-        : <String>[];
-    if (selected.isEmpty) {
-      patch["selectedDevices"] = ["1", "2", "3", "4"];
-    }
-    if ((data["fullName"] ?? "").toString().isEmpty) {
-      final email = FirebaseAuth.instance.currentUser?.email ?? "";
-      patch["fullName"] = email.isEmpty ? "You" : email.split("@").first;
-    }
-    if (patch.isNotEmpty) {
-      await _fs
-          .collection("users")
-          .doc(uid)
-          .set(patch, SetOptions(merge: true));
-      r.currentUserPatched = true;
     }
   }
 

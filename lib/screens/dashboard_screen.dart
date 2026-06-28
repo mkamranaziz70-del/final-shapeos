@@ -16,6 +16,8 @@ import '../widgets/logs_tab.dart';
 import '../widgets/voice_tab.dart';
 import '../widgets/anomalies_tab.dart';
 import '../widgets/bills_tab.dart';
+import '../widgets/optimization_tab.dart';
+import '../widgets/rooms_tab.dart';
 
 import '../services/device_monitor_service.dart';
 import '../services/voice_service.dart';
@@ -25,8 +27,8 @@ import '../services/anomaly_detection_service.dart';
 import '../services/agent_automation_engine.dart';
 import '../services/agent_mode_service.dart';
 import '../services/agent_orchestrator.dart';
+import '../services/dashboard_nav_service.dart';
 import 'agent_chat_screen.dart';
-import 'profile_setup_screen.dart';
 class InitialSetupDialog extends StatefulWidget {
 
   const InitialSetupDialog({super.key});
@@ -449,6 +451,8 @@ late DatabaseReference _dbRef;
 
   final List<String> _titles = [
     "Home",
+    "Rooms",
+    "Optimization",
     "Control",
     "AI Anomalies",
     "Energy Analytics",
@@ -473,6 +477,7 @@ _dbRef = FirebaseDatabase.instance
   _startGlobalMonitoring();
   _checkFirstLogin();
   _bootAgent();
+  _wireDashboardNav();
 }
 
 Future<void> _bootAgent() async {
@@ -481,6 +486,19 @@ Future<void> _bootAgent() async {
   await LocationService.start();
   await AgentOrchestrator.start();
   await AgentModeService.boot();
+}
+
+/// Listen for cross-tab navigation requests (eg. Energy tab's
+/// "View AI Optimization Report" CTA). When a tab is requested
+/// we switch and clear the request so it doesn't fire twice.
+void _wireDashboardNav() {
+  DashboardNavService.requestedTab.addListener(() {
+    final idx = DashboardNavService.requestedTab.value;
+    if (idx == null) return;
+    if (!mounted) return;
+    setState(() => _currentIndex = idx);
+    DashboardNavService.clear();
+  });
 }
 
 /// Wraps any tab so it becomes non-interactive while AI mode is
@@ -631,49 +649,11 @@ Widget _buildModeToggle() {
 
 
 Future<void> _checkFirstLogin() async {
-  final uid = FirebaseAuth.instance.currentUser!.uid;
-
-  final doc = await FirebaseFirestore.instance
-      .collection("users")
-      .doc(uid)
-      .get();
-
-  final firstDone =
-      doc.data()?['firstLoginCompleted'] ?? false;
-  final agentDone =
-      doc.data()?['agentProfileCompleted'] ?? false;
-
-  if (!firstDone) {
-    Future.delayed(Duration.zero, _showSetupPopup);
-  } else if (!agentDone) {
-    Future.delayed(Duration.zero, _showAgentProfilePopup);
-  } else {
-    UserProfileService.load();
-  }
-}
-void _showSetupPopup() {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const InitialSetupDialog(),
-  ).then((_) {
-    // After room/device setup, immediately collect the rich
-    // agent profile if it isn't done yet.
-    if (!mounted) return;
-    UserProfileService.isProfileComplete().then((done) {
-      if (!done && mounted) _showAgentProfilePopup();
-    });
-  });
-}
-
-void _showAgentProfilePopup() {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => ProfileSetupScreen(
-      onComplete: () => Navigator.of(context).pop(),
-    ),
-  );
+  // Admin-mode app — no per-user onboarding. The room model
+  // (managed in the Rooms tab) replaces user profile + initial
+  // device selection. We just preload the profile if it exists
+  // for backwards compatibility with the chat agent.
+  UserProfileService.load();
 }
 
 
@@ -906,6 +886,8 @@ void _listenToRealtimeDB() {
         onDeviceTap: (d) =>
             context.push('/dashboard/device-detail', extra: d),
       ),
+      const RoomsTab(),
+      const OptimizationTab(),
       _aiGuard(
         ControlTab(
           appliances: appliancesList,
@@ -1041,24 +1023,33 @@ Widget build(BuildContext context) {
           child: Row(
             children: [
               _navItem(icon: Icons.home_rounded, label: "Home", index: 0),
-              _navItem(icon: Icons.settings_rounded, label: "Control", index: 1),
+              _navItem(
+                  icon: Icons.meeting_room_rounded,
+                  label: "Rooms",
+                  index: 1),
+              _navItem(
+                  icon: Icons.auto_graph_rounded,
+                  label: "Optimize",
+                  index: 2),
+              _navItem(
+                  icon: Icons.settings_rounded, label: "Control", index: 3),
               _navItem(
                   icon: Icons.shield_moon_rounded,
                   label: "Anomalies",
-                  index: 2),
+                  index: 4),
               _navItem(
-                  icon: Icons.show_chart_rounded, label: "Energy", index: 3),
+                  icon: Icons.show_chart_rounded, label: "Energy", index: 5),
               _navItem(
                   icon: Icons.receipt_long_rounded,
                   label: "Bills",
-                  index: 4),
+                  index: 6),
               _navItem(
-                  icon: Icons.security_rounded, label: "Security", index: 5),
+                  icon: Icons.security_rounded, label: "Security", index: 7),
               _navItem(
-                  icon: Icons.history_rounded, label: "Logs", index: 6),
-              _navItem(icon: Icons.mic_rounded, label: "Voice", index: 7),
+                  icon: Icons.history_rounded, label: "Logs", index: 8),
+              _navItem(icon: Icons.mic_rounded, label: "Voice", index: 9),
               _navItem(
-                  icon: Icons.smart_toy_rounded, label: "Agent", index: 8),
+                  icon: Icons.smart_toy_rounded, label: "Agent", index: 10),
             ],
           ),
         ),

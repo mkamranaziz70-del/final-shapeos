@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'models/device_model.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/device_detail_screen.dart';
@@ -14,31 +13,22 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/dashboard',
 
+  // Single-admin mode — no auth screens. main.dart silently
+  // signs in anonymously so FirebaseAuth.currentUser is always
+  // populated by the time routes are evaluated. We deliberately
+  // route any legacy login/signup/welcome path back to the
+  // dashboard so older deep links don't show empty pages.
   redirect: (context, state) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    final location = state.matchedLocation;
-
-    final goingToLogin = location == '/login';
-    final goingToSignup = location == '/signup';
-    final goingToWelcome = location == '/welcome';
-    final goingToSplash = location == '/';
-
-    // 🚫 If not logged in
-    if (user == null) {
-      if (goingToLogin || goingToSignup || goingToWelcome || goingToSplash) {
-        return null;
-      }
-      return '/login';
-    }
-
-    // ✅ If logged in
-    if (goingToLogin || goingToSignup || goingToWelcome) {
+    final loc = state.matchedLocation;
+    if (loc == '/' ||
+        loc == '/login' ||
+        loc == '/signup' ||
+        loc == '/welcome' ||
+        loc == '/forgot-password') {
       return '/dashboard';
     }
-
     return null;
   },
 
